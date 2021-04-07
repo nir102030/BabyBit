@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { Button, Overlay } from 'react-native-elements';
 import ShiftList from '../components/ShiftList';
@@ -8,8 +8,10 @@ import CustomModal from '../components/modals/CustomModal';
 import usePayment from '../hooks/usePayment';
 import useShift from '../hooks/useShift';
 import moment from 'moment';
+import { Context as AuthContext } from '../context/AuthContext';
 
 const HomeScreen = () => {
+	const { state } = useContext(AuthContext);
 	const [shift, setShift] = useState({ date: new Date(), from: new Date(), to: new Date(), payment: 0, paied: 0 });
 	const [shifts, addShift, removeShift, setPaiedShifts] = useShift([]);
 	const [payment, setPayment] = useState(0);
@@ -83,7 +85,6 @@ const HomeScreen = () => {
 				}}
 			/>
 			<Text style={styles.text}>סה"כ לתשלום: {paymentDetails.totalPayment}</Text>
-			<Text style={styles.text}>שולם: {paymentDetails.totalPaied}</Text>
 			<View style={styles.buttonsView}>
 				<Button
 					title="הוסף משמרת"
