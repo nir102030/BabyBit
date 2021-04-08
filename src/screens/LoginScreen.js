@@ -17,13 +17,13 @@ const LoginScreen = ({ navigation }) => {
 		<View style={styles.container}>
 			<View style={styles.inputsContainer}>
 				<TextInput
-					placeholder="Insert User Name"
+					placeholder="הכנס שם משתמש"
 					value={userName}
 					onChangeText={(value) => setUserName(value)}
 					style={appStyles.input}
 				/>
 				<TextInput
-					placeholder="Insert Password "
+					placeholder="הכנס סיסמא"
 					value={password}
 					onChangeText={(value) => setPassword(value)}
 					style={appStyles.input}
@@ -31,9 +31,9 @@ const LoginScreen = ({ navigation }) => {
 			</View>
 			{state.err ? <Text style={appStyles.error}>{state.err}</Text> : null}
 			<View style={styles.buttonsContainer}>
-				<Button title="Signin" onPress={() => handleSignin()} containerStyle={appStyles.button} />
+				<Button title="כנס לחשבון" onPress={() => handleSignin()} containerStyle={appStyles.button} />
 				<Button
-					title="Not registed yet?"
+					title="לא רשום עדיין? עבור להרשמה"
 					onPress={() => {
 						clearError();
 						navigation.navigate('Signup');

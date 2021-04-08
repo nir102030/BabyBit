@@ -48,7 +48,6 @@ const editGroup = (dispatch) => async (group) => {
 };
 
 const getGroup = (dispatch) => async (groupId) => {
-	console.log(groupId);
 	try {
 		const response = await api.get('/getGroup', { headers: { groupid: groupId } });
 		dispatch({
@@ -71,12 +70,19 @@ const clearError = (dispatch) => () => {
 	});
 };
 
+const setLoading = (dispatch) => () => {
+	dispatch({
+		type: 'setLoading',
+		payload: false,
+	});
+};
+
 export const { Provider, Context } = createDataContext(
 	groupReducer,
-	{ addGroup, editGroup, getGroup },
+	{ addGroup, editGroup, getGroup, setLoading },
 	{
 		group: null,
 		err: null,
-		loading: false,
+		loading: true,
 	}
 );

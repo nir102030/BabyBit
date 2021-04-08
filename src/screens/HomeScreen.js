@@ -13,9 +13,9 @@ import { Context as AuthContext } from '../context/AuthContext';
 const HomeScreen = () => {
 	const { state } = useContext(AuthContext);
 	const [shift, setShift] = useState({ date: new Date(), from: new Date(), to: new Date(), payment: 0, paied: 0 });
-	const [shifts, addShift, removeShift, setPaiedShifts] = useShift([]);
 	const [payment, setPayment] = useState(0);
 	const [paymentDetails, pay, addPayment, removePayment] = usePayment();
+	const [shifts, addShift, removeShift, setPaiedShifts] = useShift(state.user.groupId, addPayment);
 	const [modal, setModal] = useState({ visible: false });
 	const [err, setErr] = useState('');
 
@@ -92,12 +92,14 @@ const HomeScreen = () => {
 					buttonStyle={styles.button}
 					onPress={() => showShiftModal()}
 				/>
-				<Button
-					title="לתשלום"
-					containerStyle={styles.buttonContainer}
-					buttonStyle={styles.button}
-					onPress={() => showPaymentModal()}
-				/>
+				{state.user.type === 'parent' ? (
+					<Button
+						title="לתשלום"
+						containerStyle={styles.buttonContainer}
+						buttonStyle={styles.button}
+						onPress={() => showPaymentModal()}
+					/>
+				) : null}
 			</View>
 			<CustomModal
 				modal={modal}

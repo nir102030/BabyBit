@@ -31,7 +31,7 @@ const JoinGroupScreen = () => {
 					...user,
 					groupId: groupId,
 				});
-				addGroup({ ...group, id: groupId, participants: [user] });
+				addGroup({ ...group, id: groupId, participants: [user], totalPayment: 0 });
 			} else alert('התשלום השעתי חייב להכיל ספרות בלבד');
 		}
 	};

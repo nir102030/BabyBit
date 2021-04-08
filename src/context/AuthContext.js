@@ -55,9 +55,9 @@ const signin = (dispatch) => async (userName, password) => {
 	}
 };
 
-const signup = (dispatch) => async (userName, password, name) => {
+const signup = (dispatch) => async (userName, password, name, type, image) => {
 	try {
-		const token = await api.post('/signup', { userName, password, name });
+		const token = await api.post('/signup', { userName, password, name, type, image });
 		dispatch({
 			type: 'clearError',
 		});
@@ -87,7 +87,6 @@ const clearError = (dispatch) => () => {
 const editUser = (dispatch) => async (user) => {
 	try {
 		const response = await api.post('/editUser', { user });
-		console.log(response.data);
 		dispatch({
 			type: 'editUser',
 			payload: user,

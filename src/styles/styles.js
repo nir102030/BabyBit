@@ -20,6 +20,6 @@ export const styles = StyleSheet.create({
 	error: {
 		color: 'red',
 		fontSize: 16,
-		flex: 0.5,
+		flex: 1,
 	},
 });

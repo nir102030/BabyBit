@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Dimensions } from 'react-native';
 import { Icon } from 'react-native-elements';
 
-const SettingsDetail = ({ fieldName, initialFieldValue, editGroup }) => {
+const SettingsDetail = ({ fieldName, initialFieldValue, editGroup, userType }) => {
 	const [editMode, setEditMode] = useState(false);
 	const [fieldValue, setFieldValue] = useState(initialFieldValue);
 
@@ -38,7 +38,9 @@ const SettingsDetail = ({ fieldName, initialFieldValue, editGroup }) => {
 			) : (
 				<Text style={styles.fieldValue}>{fieldValue}</Text>
 			)}
-			<Icon name="edit" type="material" size={20} style={styles.editIcon} onPress={() => handleEditClick()} />
+			{userType == 'parent' ? (
+				<Icon name="edit" type="material" size={20} style={styles.editIcon} onPress={() => handleEditClick()} />
+			) : null}
 		</View>
 	);
 };
@@ -51,15 +53,18 @@ const styles = StyleSheet.create({
 		marginHorizontal: Dimensions.get('window').width * 0.15,
 		alignItems: 'center',
 		marginVertical: 10,
+		borderBottomWidth: 0.5,
+		paddingVertical: 10,
+		borderColor: 'rgba(0,0,0,0.4)',
 	},
 	fieldName: {
-		flex: 3,
+		flex: 4,
 		fontWeight: 'bold',
-		fontSize: 18,
+		fontSize: 17,
 	},
 	fieldValue: {
 		flex: 4,
-		fontSize: 18,
+		fontSize: 17,
 		marginHorizontal: 5,
 		textAlign: 'center',
 	},

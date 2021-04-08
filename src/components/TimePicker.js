@@ -9,7 +9,7 @@ const CustomDateTimePicker = ({ time, setTime }) => {
 
 	const onChange = (event, selectedDate) => {
 		setShow(false);
-		setTime(selectedDate);
+		setTime(selectedDate ? selectedDate : time);
 	};
 
 	return (

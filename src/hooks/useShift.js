@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import moment from 'moment';
+import { getShiftsDb, addShiftDb, editShiftDb, deleteShiftDb } from '../api/shiftsApi';
 
-const useShift = () => {
+const useShift = (groupId, addPayment) => {
 	const [shifts, setShifts] = useState([]);
 
-	const addShift = (shift, addPayment) => {
+	const addShift = async (shift, addPayment) => {
 		const shiftId =
 			shifts.length > 0
 				? Math.max.apply(
@@ -14,13 +15,16 @@ const useShift = () => {
 				: 1;
 		const totalHours = moment(shift.to).diff(moment(shift.from), 'hours');
 		const payment = totalHours * 40;
-		setShifts([...shifts, { ...shift, id: shiftId, totalHours: totalHours, payment: payment, paied: 0 }]);
+		const newShift = { ...shift, id: shiftId, totalHours: totalHours, payment: payment, paied: 0 };
+		setShifts([...shifts, newShift]);
 		addPayment(payment);
+		addShiftDb({ ...newShift, groupId: groupId }); //add the shift to db
 	};
 
 	const removeShift = (shiftToRemove) => {
 		const updatedShifts = shifts.filter((shift) => shift.id !== shiftToRemove.id);
 		setShifts(updatedShifts);
+		deleteShiftDb(shiftToRemove.id, shiftToRemove.groupId); //delete the shift from db
 	};
 
 	const setPaiedShifts = (paied) => {
@@ -37,6 +41,7 @@ const useShift = () => {
 			if (totalAmountToPay > 0) {
 				const amountCanPay = totalAmountToPay >= amountLeftToPay ? amountLeftToPay : totalAmountToPay; //the actual amount that can be paied for this shift
 				totalAmountToPay = totalAmountToPay - amountCanPay; //subtract the amount paied from the total payment amount
+				editShiftDb({ ...shift, paied: shift.paied + amountCanPay }); //edit the shift in db
 				return { ...shift, paied: shift.paied + amountCanPay }; //return the updated shift
 			} else return shift;
 		});
@@ -44,9 +49,15 @@ const useShift = () => {
 		setShifts([...shiftsAlreadyFullyPaied, ...paiedShifts]);
 	};
 
-	const getShiftsFromDb = () => {
-		const shifts = [];
-		setShifts(shifts);
+	const getShiftsFromDb = async () => {
+		const dbShifts = await getShiftsDb(groupId);
+		let totalPayment = 0;
+		dbShifts.forEach((shift) => {
+			const leftToPay = shift.payment - shift.paied;
+			if (leftToPay > 0) totalPayment = totalPayment + leftToPay;
+		});
+		addPayment(totalPayment);
+		setShifts(dbShifts);
 	};
 
 	useEffect(() => {
