@@ -41,14 +41,14 @@ const styles = StyleSheet.create({
 	dateIconContainer: {
 		flex: 2,
 		alignItems: 'center',
-		flexDirection: 'row',
+		flexDirection: 'row-reverse',
 	},
 	dateIcon: {
 		justifyContent: 'center',
-		marginLeft: Dimensions.get('window').width * 0.3,
+		marginRight: Dimensions.get('window').width * 0.3,
 	},
 	text: {
 		fontWeight: 'bold',
-		marginLeft: Dimensions.get('window').width * 0.1,
+		marginRight: Dimensions.get('window').width * 0.1,
 	},
 });

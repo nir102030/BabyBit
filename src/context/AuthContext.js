@@ -50,7 +50,7 @@ const signin = (dispatch) => async (userName, password) => {
 	} catch (err) {
 		dispatch({
 			type: 'addError',
-			payload: 'User name or password are incorrect',
+			payload: 'משהו השתבש בתהליך הכניסה. נסה שוב.',
 		});
 	}
 };
@@ -65,7 +65,7 @@ const signup = (dispatch) => async (userName, password, name, type, image) => {
 	} catch (err) {
 		dispatch({
 			type: 'addError',
-			payload: 'Somthing went wrong with signup',
+			payload: 'משהו השתבש עם ההרשמה. נסה שוב',
 		});
 		return null;
 	}

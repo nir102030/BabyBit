@@ -1,11 +1,12 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, StyleSheet, Text, Dimensions, ScrollView, Image } from 'react-native';
+import { View, TextInput, StyleSheet, Text, Dimensions, Image } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
 import ImagePicker from '../components/ImagePicker';
 import alternateProfilePic from '../assets/alternateProfilePic.webp';
+import GoogleSignUp from '../components/GoogleSignUp';
 
 const SignupScreen = ({ navigation }) => {
 	const { state, signup, clearError } = useContext(AuthContext);
@@ -24,48 +25,49 @@ const SignupScreen = ({ navigation }) => {
 			img ? img : Image.resolveAssetSource(alternateProfilePic).uri
 		);
 		if (token) {
-			clearError();
 			navigation.navigate('Login');
 		}
 	};
 
+	const handleError = () => {
+		alert(state.err);
+		clearError();
+	};
+
 	return (
-		<ScrollView contentContainerStyle={styles.container}>
+		<View style={styles.container}>
+			{state.err ? handleError() : null}
+			<View style={styles.pickerContainer}>
+				<Text style={styles.text}>בחר סוג משתמש</Text>
+				<Picker selectedValue={type} onValueChange={setType} style={appStyles.picker}>
+					<Picker.Item label="הורה" value="parent" color="rgba(0, 0, 0, 0.6)" />
+					<Picker.Item label="מטפל/ת" value="caregiver" color="rgba(0, 0, 0, 0.6)" />
+				</Picker>
+			</View>
+			<View style={styles.googleSigninContainer}>
+				<GoogleSignUp signup={signup} userType={type} navigation={navigation} />
+			</View>
+			<Text style={styles.orText}>או</Text>
 			<View style={styles.inputsContainer}>
 				<TextInput
 					placeholder="בחר שם משתמש"
 					value={userName}
-					onChangeText={(value) => setUserName(value)}
+					onChangeText={setUserName}
 					style={appStyles.input}
 				/>
 				<TextInput
 					placeholder="בחר סיסמא"
 					value={password}
-					onChangeText={(value) => setPassword(value)}
+					onChangeText={setPassword}
 					style={appStyles.input}
+					secureTextEntry={true}
 				/>
-				<TextInput
-					placeholder="שם"
-					value={name}
-					onChangeText={(value) => setName(value)}
-					style={appStyles.input}
-				/>
-				<View style={styles.pickerContainer}>
-					<Text style={styles.text}>בחר סוג משתמש</Text>
-					<Picker selectedValue={type} onValueChange={setType} style={appStyles.picker}>
-						<Picker.Item label="הורה" value="parent" color="rgba(0, 0, 0, 0.6)" />
-						<Picker.Item label="מטפל/ת" value="caregiver" color="rgba(0, 0, 0, 0.6)" />
-					</Picker>
-				</View>
-				<View style={{ marginTop: 20 }}>
+				<TextInput placeholder="מה שמך?" value={name} onChangeText={setName} style={appStyles.input} />
+				{/* <View>
 					<ImagePicker setUserImage={setImg} />
-				</View>
+				</View> */}
 			</View>
-
 			<View style={styles.buttonsContainer}>
-				{state.err ? (
-					<Text style={[appStyles.error, { marginBottom: 20, fontSize: 20 }]}>{state.err}</Text>
-				) : null}
 				<Button title="הרשם" onPress={() => handleSignup()} containerStyle={appStyles.button} />
 				<Button
 					title="כבר רשום? כנס לחשבון"
@@ -73,7 +75,7 @@ const SignupScreen = ({ navigation }) => {
 					containerStyle={appStyles.button}
 				/>
 			</View>
-		</ScrollView>
+		</View>
 	);
 };
 
@@ -81,22 +83,12 @@ export default SignupScreen;
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
-		alignItems: 'center',
-	},
-	inputsContainer: {
-		flex: 8,
-		justifyContent: 'center',
 		alignItems: 'center',
 		position: 'absolute',
-		top: 20,
-	},
-
-	buttonsContainer: {
-		flex: 2,
-		justifyContent: 'flex-start',
-		position: 'absolute',
-		bottom: 20,
+		left: 0,
+		right: 0,
+		top: 0,
+		bottom: 0,
 	},
 	pickerContainer: {
 		width: Dimensions.get('window').width * 0.7,
@@ -105,6 +97,28 @@ const styles = StyleSheet.create({
 		borderRadius: 3,
 		padding: 5,
 		margin: 10,
+		top: Dimensions.get('window').height * 0.02,
+		position: 'absolute',
+	},
+	googleSigninContainer: {
+		alignItems: 'center',
+		position: 'absolute',
+		top: Dimensions.get('window').height * 0.15,
+	},
+	orText: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		position: 'absolute',
+		top: Dimensions.get('window').height * 0.25,
+	},
+	inputsContainer: {
+		alignItems: 'center',
+		top: Dimensions.get('window').height * 0.3,
+		position: 'absolute',
+	},
+	buttonsContainer: {
+		top: Dimensions.get('window').height * 0.75,
+		position: 'absolute',
 	},
 	text: {
 		fontSize: 18,

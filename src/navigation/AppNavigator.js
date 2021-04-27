@@ -1,13 +1,16 @@
 import React, { useContext, useEffect } from 'react';
-import { View, Text, Image, ActivityIndicator } from 'react-native';
+import { View, Text, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, CommonActions, useNavigation } from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import JoinGroupScreen from '../screens/JoinGroupScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import PaidShiftsScreen from '../screens/PaidShiftsScreen';
+import GroupScreen from '../screens/GroupScreen';
 import { Icon } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
@@ -56,17 +59,20 @@ const AppNavigator = () => {
 		);
 	};
 
-	const headerRight = () => {
+	const headerLeft = () => {
+		const navigation = useNavigation();
 		return (
-			<Image
-				source={{ uri: state.user.image }}
-				style={{
-					height: 40,
-					width: 40,
-					borderRadius: 30,
-					marginEnd: 15,
-				}}
-			/>
+			<TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate('Profile'))}>
+				<Image
+					source={{ uri: state.user.image }}
+					style={{
+						height: 40,
+						width: 40,
+						borderRadius: 30,
+						marginLeft: 15,
+					}}
+				/>
+			</TouchableOpacity>
 		);
 	};
 
@@ -75,8 +81,8 @@ const AppNavigator = () => {
 			headerTitle: headerTitle,
 			headerTitleStyle: { flex: 1, alignSelf: 'center' },
 			headerTitleContainerStyle: { left: 0, zIndex: 1 },
-			headerLeftContainerStyle: { marginHorizontal: 10, zIndex: 2 },
-			headerLeft: () => (
+			headerRightContainerStyle: { marginHorizontal: 10, zIndex: 2 },
+			headerRight: () => (
 				<Icon
 					name="menu"
 					type="material"
@@ -85,7 +91,15 @@ const AppNavigator = () => {
 					onPress={() => navigation.openDrawer()}
 				/>
 			),
-			headerRight: headerRight,
+			headerLeft: headerLeft,
+		};
+	};
+
+	const profileScreenOptions = () => {
+		return {
+			headerTitle: headerTitle,
+			headerTitleStyle: { flex: 1, alignSelf: 'center' },
+			headerTitleContainerStyle: { left: 0, zIndex: 1 },
 		};
 	};
 
@@ -118,6 +132,16 @@ const AppNavigator = () => {
 		return (
 			<Stack.Navigator headerMode="screen">
 				<Stack.Screen name="Home" component={HomeScreen} options={options} />
+				<Stack.Screen name="Profile" component={ProfileScreen} options={profileScreenOptions} />
+			</Stack.Navigator>
+		);
+	};
+
+	const PaidShiftsStack = () => {
+		return (
+			<Stack.Navigator headerMode="screen">
+				<Stack.Screen name="Home" component={PaidShiftsScreen} options={options} />
+				<Stack.Screen name="Profile" component={ProfileScreen} options={profileScreenOptions} />
 			</Stack.Navigator>
 		);
 	};
@@ -125,7 +149,8 @@ const AppNavigator = () => {
 	const SettingsStack = () => {
 		return (
 			<Stack.Navigator>
-				<Stack.Screen name="Settings" component={SettingsScreen} options={options} />
+				<Stack.Screen name="Settings" component={GroupScreen} options={options} />
+				<Stack.Screen name="Profile" component={ProfileScreen} options={profileScreenOptions} />
 			</Stack.Navigator>
 		);
 	};
@@ -139,9 +164,10 @@ const AppNavigator = () => {
 			{!state.token ? (
 				loginStack()
 			) : state.user.groupId && groupState.group ? (
-				<Drawer.Navigator initialRouteName="Home">
-					<Drawer.Screen name="בית" component={HomeStack} />
-					<Drawer.Screen name="הגדרות" component={SettingsStack} />
+				<Drawer.Navigator initialRouteName="Home" drawerPosition="right">
+					<Drawer.Screen name="משמרות פתוחות" component={HomeStack} />
+					<Drawer.Screen name="משמרות ששולמו" component={PaidShiftsStack} />
+					<Drawer.Screen name="הקבוצה שלי" component={SettingsStack} />
 				</Drawer.Navigator>
 			) : (
 				<Stack.Navigator>
@@ -152,7 +178,6 @@ const AppNavigator = () => {
 							headerTitle: headerTitle,
 							headerTitleStyle: { flex: 1, alignSelf: 'center' },
 							headerTitleContainerStyle: { left: 0, zIndex: 1 },
-							headerRight: headerRight,
 						}}
 					/>
 				</Stack.Navigator>

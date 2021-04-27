@@ -23,11 +23,12 @@ export default function ImagePicker({ setUserImage }) {
 			allowsEditing: true,
 			aspect: [4, 3],
 			quality: 1,
+			base64: true,
 		});
-
 		if (!result.cancelled) {
-			setImage(result.uri);
-			setUserImage(result.uri);
+			const userImg = `data:image/png;base64,${result.base64}`;
+			setImage(userImg);
+			setUserImage(userImg);
 		}
 	};
 
@@ -51,8 +52,8 @@ const styles = StyleSheet.create({
 		marginHorizontal: 20,
 	},
 	image: {
-		width: 150,
-		height: 150,
-		borderRadius: 120,
+		width: 100,
+		height: 100,
+		borderRadius: 100,
 	},
 });

@@ -8,22 +8,16 @@ import SettingsDetail from '../components/SettingsDetail';
 import { Fontisto, FontAwesome5 } from '@expo/vector-icons';
 
 const SettingsScreen = () => {
-	const { state, signout, editUser } = useContext(AuthContext);
+	const { state, editUser } = useContext(AuthContext);
 	const groupContext = useContext(GroupContext);
 	const groupState = groupContext.state;
 	const { group, err } = groupState;
 	const editGroup = groupContext.editGroup;
-	const signoutAlert = () => {
-		Alert.alert('היי', 'אתה בטוח שברצונך להתנתק?', [
-			{ text: 'ביטול', style: 'cancel' },
-			{ text: 'כן, התנתק מהפרופיל', onPress: () => signout() },
-		]);
-	};
 
 	const share = async () => {
 		try {
 			const result = await Share.share({
-				message: `היי! הוזמנת על ידי ${state.user.name} להצטרף לקבוצה באפליקציית BabyBit. כל שנותר לך הוא להוריד את האפליקציה מחנות האפליקציות ולמלא את קוד הקבוצה: ${group.id}`,
+				message: `היי! הוזמנת על ידי ${state.user.name} להצטרף לקבוצה באפליקציית BabyBit. כל שנותר לך הוא להוריד את האפליקציה מחנות האפליקציות ולמלא את קוד הקבוצה: ${group.id}. לינק להורדת האפליקציה: https://play.google.com/store/apps/details?id=com.nirkatz.babybit`,
 			});
 			if (result.action === Share.sharedAction) {
 				if (result.activityType) {
@@ -80,7 +74,7 @@ const SettingsScreen = () => {
 					flex: 4,
 					width: Dimensions.get('window').width * 0.9,
 					alignItems: 'center',
-					justifyContent: 'flex-start',
+					justifyContent: 'center',
 				}}
 			>
 				<View style={styles.participantsContainer}>
@@ -141,14 +135,13 @@ const SettingsScreen = () => {
 				</View>
 			</View>
 
-			<View style={{ flex: 2 }}>
+			<View style={{ flex: 3, justifyContent: 'flex-end' }}>
 				<Text style={appStyles.err}>{err}</Text>
 				<Button
 					title="החלף קבוצה"
 					onPress={() => changeGroupAlert()}
-					buttonStyle={[appStyles.button, { marginBottom: 20 }]}
+					buttonStyle={[appStyles.button, { marginBottom: 40 }]}
 				/>
-				<Button title="התנתק" onPress={() => signoutAlert()} buttonStyle={appStyles.button} />
 			</View>
 		</View>
 	);
@@ -160,6 +153,19 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: 'center',
+	},
+	imageContainer: {
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginBottom: 0,
+	},
+	image: {
+		width: 150,
+		height: 150,
+		borderRadius: 120,
+		borderWidth: 3,
+		borderColor: '#e8edeb',
+		marginTop: 20,
 	},
 	title: {
 		margin: 20,
@@ -198,8 +204,8 @@ const styles = StyleSheet.create({
 		flexDirection: 'column',
 	},
 	participantsContainer: {
-		flexDirection: 'row',
-		alignItems: 'flex-start',
+		flexDirection: 'row-reverse',
+		alignItems: 'center',
 		justifyContent: 'center',
 		marginTop: 20,
 	},

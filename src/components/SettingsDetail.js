@@ -30,7 +30,6 @@ const SettingsDetail = ({ fieldName, initialFieldValue, editGroup, userType }) =
 			<Text style={styles.fieldName}>{fieldName}:</Text>
 			{editMode ? (
 				<TextInput
-					placeholder={`הזן ${fieldName}`}
 					value={fieldValue}
 					onChangeText={setFieldValue}
 					style={[styles.fieldValue, { backgroundColor: 'rgba(0,0,0,0.05)' }]}
@@ -39,7 +38,24 @@ const SettingsDetail = ({ fieldName, initialFieldValue, editGroup, userType }) =
 				<Text style={styles.fieldValue}>{fieldValue}</Text>
 			)}
 			{userType == 'parent' ? (
-				<Icon name="edit" type="material" size={20} style={styles.editIcon} onPress={() => handleEditClick()} />
+				editMode ? (
+					<Icon
+						name="check"
+						type="material"
+						color="green"
+						size={30}
+						style={styles.checkIcon}
+						onPress={() => handleEditClick()}
+					/>
+				) : (
+					<Icon
+						name="edit"
+						type="material"
+						size={30}
+						style={styles.editIcon}
+						onPress={() => handleEditClick()}
+					/>
+				)
 			) : null}
 		</View>
 	);
@@ -49,8 +65,8 @@ export default SettingsDetail;
 
 const styles = StyleSheet.create({
 	groupDetailView: {
-		flexDirection: 'row',
-		marginHorizontal: Dimensions.get('window').width * 0.15,
+		flexDirection: 'row-reverse',
+		marginHorizontal: Dimensions.get('window').width * 0.05,
 		alignItems: 'center',
 		marginVertical: 10,
 		borderBottomWidth: 0.5,
@@ -60,15 +76,19 @@ const styles = StyleSheet.create({
 	fieldName: {
 		flex: 4,
 		fontWeight: 'bold',
-		fontSize: 17,
+		fontSize: 22,
 	},
 	fieldValue: {
 		flex: 4,
-		fontSize: 17,
+		fontSize: 22,
 		marginHorizontal: 5,
 		textAlign: 'center',
 	},
 	editIcon: {
 		flex: 1,
+	},
+	checkIcon: {
+		flex: 1,
+		color: 'green',
 	},
 });

@@ -1,6 +1,8 @@
 import React, { useState, useContext } from 'react';
+import { Dimensions } from 'react-native';
 import { View, TextInput, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-elements';
+import GoogleSignIn from '../components/GoogleSignIn';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
 
@@ -13,9 +15,15 @@ const LoginScreen = ({ navigation }) => {
 		signin(userName, password);
 	};
 
+	const handleError = () => {
+		alert(state.err);
+		clearError();
+	};
+
 	return (
 		<View style={styles.container}>
-			<View style={styles.inputsContainer}>
+			{state.err ? handleError() : null}
+			<View style={styles.emailSigninContainer}>
 				<TextInput
 					placeholder="הכנס שם משתמש"
 					value={userName}
@@ -27,11 +35,15 @@ const LoginScreen = ({ navigation }) => {
 					value={password}
 					onChangeText={(value) => setPassword(value)}
 					style={appStyles.input}
+					secureTextEntry={true}
 				/>
-			</View>
-			{state.err ? <Text style={appStyles.error}>{state.err}</Text> : null}
-			<View style={styles.buttonsContainer}>
 				<Button title="כנס לחשבון" onPress={() => handleSignin()} containerStyle={appStyles.button} />
+			</View>
+			<Text style={styles.orText}>או</Text>
+			<View style={styles.googleSigninContainer}>
+				<GoogleSignIn signin={signin} />
+			</View>
+			<View style={styles.buttonsContainer}>
 				<Button
 					title="לא רשום עדיין? עבור להרשמה"
 					onPress={() => {
@@ -49,17 +61,31 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
 		alignItems: 'center',
-		justifyContent: 'center',
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		top: 0,
+		bottom: 0,
 	},
-	inputsContainer: {
-		flex: 4,
-		justifyContent: 'center',
+	emailSigninContainer: {
 		alignItems: 'center',
+		position: 'absolute',
+		top: Dimensions.get('window').height * 0.02,
+	},
+	googleSigninContainer: {
+		alignItems: 'center',
+		position: 'absolute',
+		top: Dimensions.get('window').height * 0.33,
+	},
+	orText: {
+		fontSize: 26,
+		fontWeight: 'bold',
+		position: 'absolute',
+		top: Dimensions.get('window').height * 0.28,
 	},
 	buttonsContainer: {
-		flex: 6,
-		justifyContent: 'flex-start',
+		position: 'absolute',
+		top: Dimensions.get('window').height * 0.8,
 	},
 });

@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { Dimensions } from 'react-native';
 import { View, TextInput, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
@@ -27,11 +28,12 @@ const JoinGroupScreen = () => {
 			let isnum = /^\d+$/.test(group.hourlyPayment);
 			if (isnum) {
 				const groupId = generateGroupId();
-				editUser({
+				const editedUser = {
 					...user,
 					groupId: groupId,
-				});
-				addGroup({ ...group, id: groupId, participants: [user], totalPayment: 0 });
+				};
+				editUser(editedUser);
+				addGroup({ ...group, id: groupId, participants: [editedUser], totalPayment: 0 });
 			} else alert('התשלום השעתי חייב להכיל ספרות בלבד');
 		}
 	};
@@ -44,11 +46,12 @@ const JoinGroupScreen = () => {
 			if (!dbGroup) {
 				alert('קוד הקבוצה שגוי! נסה קוד אחר');
 			} else {
-				editGroup({ ...dbGroup, participants: [...dbGroup.participants, user] });
-				editUser({
+				const editedUser = {
 					...user,
 					groupId: group.id,
-				});
+				};
+				editGroup({ ...dbGroup, participants: [...dbGroup.participants, editedUser] });
+				editUser(editedUser);
 			}
 		}
 	};
@@ -101,7 +104,10 @@ const JoinGroupScreen = () => {
 			<Button
 				title="המשך"
 				onPress={() => (groupStatus === 'new' ? handleNewGroupSubmit() : handleOldGroupSubmit())}
-				containerStyle={[appStyles.button, { margin: 30 }]}
+				containerStyle={[
+					appStyles.button,
+					{ margin: 30, position: 'absolute', top: Dimensions.get('window').height * 0.75 },
+				]}
 			/>
 		</View>
 	);
@@ -111,13 +117,17 @@ export default JoinGroupScreen;
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
 		alignItems: 'center',
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		top: 0,
+		bottom: 0,
 	},
 	textContainer: {
-		flex: 2,
 		alignItems: 'center',
-		justifyContent: 'center',
+		top: Dimensions.get('window').height * 0.05,
+		position: 'absolute',
 	},
 	intro1: {
 		fontSize: 20,
@@ -130,7 +140,9 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	buttonsContainer: {
-		flex: 5,
+		alignItems: 'center',
+		top: Dimensions.get('window').height * 0.2,
+		position: 'absolute',
 	},
 	input: {
 		textAlign: 'center',
