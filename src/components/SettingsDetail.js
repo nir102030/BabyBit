@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Dimensions, Alert } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 const SettingsDetail = ({ fieldName, initialFieldValue, editGroup, userType }) => {
@@ -13,14 +13,14 @@ const SettingsDetail = ({ fieldName, initialFieldValue, editGroup, userType }) =
 
 	const handleUserEdit = () => {
 		if (!fieldValue) {
-			alert(`חובה להזין ${fieldName}`);
+			Alert.alert('', `חובה להזין ${fieldName}`, [{ text: 'הבנתי' }]);
 		} else {
 			let isValid = fieldName == 'תשלום שעתי' ? /^\d+$/.test(fieldValue) : true;
 			if (isValid) {
 				setEditMode(false);
 				editGroup(fieldValue);
 			} else {
-				alert('התשלום השעתי חייב להכיל ספרות בלבד');
+				Alert.alert('', 'התשלום השעתי חייב להכיל ספרות בלבד', [{ text: 'הבנתי' }]);
 			}
 		}
 	};
@@ -76,11 +76,11 @@ const styles = StyleSheet.create({
 	fieldName: {
 		flex: 4,
 		fontWeight: 'bold',
-		fontSize: 22,
+		fontSize: 20,
 	},
 	fieldValue: {
 		flex: 4,
-		fontSize: 22,
+		fontSize: 20,
 		marginHorizontal: 5,
 		textAlign: 'center',
 	},

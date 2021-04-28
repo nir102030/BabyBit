@@ -8,12 +8,12 @@ const authReducer = (state, action) => {
 			return { ...state, token: action.payload.token, user: action.payload.user, err: null, loading: false };
 		case 'signout':
 			return { ...state, token: null };
-		case 'addError':
+		case 'addErr':
 			return { ...state, err: action.payload, loading: false };
 		case 'setLoading':
 			return { ...state, loading: action.payload };
 		case 'clearError':
-			return { ...state, err: null };
+			return { ...state, err: null, loading: false };
 		case 'editUser':
 			return { ...state, user: action.payload };
 		default:
@@ -49,22 +49,22 @@ const signin = (dispatch) => async (userName, password) => {
 		});
 	} catch (err) {
 		dispatch({
-			type: 'addError',
+			type: 'addErr',
 			payload: 'משהו השתבש בתהליך הכניסה. נסה שוב.',
 		});
 	}
 };
 
-const signup = (dispatch) => async (userName, password, name, type, image) => {
+const signup = (dispatch) => async (userName, password, name, type, image, notificationsEnabled) => {
 	try {
-		const token = await api.post('/signup', { userName, password, name, type, image });
+		const token = await api.post('/signup', { userName, password, name, type, image, notificationsEnabled });
 		dispatch({
 			type: 'clearError',
 		});
 		return token;
 	} catch (err) {
 		dispatch({
-			type: 'addError',
+			type: 'addErr',
 			payload: 'משהו השתבש עם ההרשמה. נסה שוב',
 		});
 		return null;
@@ -96,9 +96,16 @@ const editUser = (dispatch) => async (user) => {
 	}
 };
 
+const setLoading = (dispatch) => (flag) => {
+	dispatch({
+		type: 'setLoading',
+		payload: flag,
+	});
+};
+
 export const { Provider, Context } = createDataContext(
 	authReducer,
-	{ tryLocalSignin, signin, signup, signout, clearError, editUser },
+	{ tryLocalSignin, signin, signup, signout, clearError, editUser, setLoading },
 	{
 		token: null,
 		err: null,

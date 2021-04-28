@@ -1,10 +1,11 @@
-import React, { useState, useContext } from 'react';
-import { Dimensions } from 'react-native';
-import { View, TextInput, StyleSheet, Text } from 'react-native';
-import { Button } from 'react-native-elements';
+import React, { useState, useContext, useEffect } from 'react';
+import { Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
+import { Button, Input } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
 import { styles as appStyles } from '../styles/styles';
+import { registerForPushNotificationsAsync } from '../api/notificationsApi';
 
 const JoinGroupScreen = () => {
 	const { state, editUser } = useContext(AuthContext);
@@ -21,9 +22,9 @@ const JoinGroupScreen = () => {
 
 	const handleNewGroupSubmit = () => {
 		if (!group.name) {
-			alert('חובה להזין את שם הקבוצה');
+			Alert.alert('', 'חובה להזין את שם הקבוצה', [{ text: 'הבנתי' }]);
 		} else if (!group.hourlyPayment) {
-			alert('חובה להזין תשלום שעתי');
+			Alert.alert('', 'חובה להזין תשלום שעתי', [{ text: 'הבנתי' }]);
 		} else {
 			let isnum = /^\d+$/.test(group.hourlyPayment);
 			if (isnum) {
@@ -34,17 +35,17 @@ const JoinGroupScreen = () => {
 				};
 				editUser(editedUser);
 				addGroup({ ...group, id: groupId, participants: [editedUser], totalPayment: 0 });
-			} else alert('התשלום השעתי חייב להכיל ספרות בלבד');
+			} else Alert.alert('', 'התשלום השעתי חייב להכיל ספרות בלבד', [{ text: 'הבנתי' }]);
 		}
 	};
 
 	const handleOldGroupSubmit = async () => {
 		if (!group.id) {
-			alert('חובה להזין את קוד הקבוצה');
+			Alert.alert('', 'חובה להזין את קוד הקבוצה', [{ text: 'הבנתי' }]);
 		} else {
 			const dbGroup = await getGroup(group.id);
 			if (!dbGroup) {
-				alert('קוד הקבוצה שגוי! נסה קוד אחר');
+				Alert.alert('', 'קוד הקבוצה שגוי! נסה קוד אחר', [{ text: 'הבנתי' }]);
 			} else {
 				const editedUser = {
 					...user,
@@ -56,27 +57,38 @@ const JoinGroupScreen = () => {
 		}
 	};
 
+	const initiateNotificationsService = async () => {
+		const expoPushToken = await registerForPushNotificationsAsync();
+		editUser({ ...state.user, expoPushToken: expoPushToken });
+	};
+
+	useEffect(() => {
+		if (!state.user.expoPushToken) initiateNotificationsService();
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.textContainer}>
-				<Text style={styles.intro1}>ברוכים הבאים לבייבי-ביט! אפליקציה לניהול המשמרות והתשלומים לבייביסיטר</Text>
+				<Text style={styles.intro1}>
+					{`ברוכים הבאים לבייבי-ביט! \n אפליקציה לניהול המשמרות והתשלומים של הבייביסיטר`}
+				</Text>
 			</View>
 			<View style={styles.buttonsContainer}>
-				<Text style={styles.intro2}>בחר\י אחת משתי האופציות הבאות:</Text>
+				<Text style={styles.intro2}>כדי להתחיל, בחר\י אחת משתי האופציות הבאות:</Text>
 				<Button
 					title="צור קבוצה חדשה"
 					onPress={() => setGroupStatus('new')}
 					containerStyle={appStyles.button}
 				/>
 				{groupStatus === 'new' ? (
-					<View>
-						<TextInput
+					<View style={{ width: Dimensions.get('window').width * 0.7 }}>
+						<Input
 							placeholder="בחר שם לקבוצה"
 							value={group.name}
 							onChangeText={(input) => setGroup({ ...group, name: input })}
 							style={[appStyles.input, styles.input]}
 						/>
-						<TextInput
+						<Input
 							placeholder="הזן תשלום שעתי"
 							value={group.hourlyPayment}
 							onChangeText={(input) => setGroup({ ...group, hourlyPayment: input })}
@@ -92,7 +104,7 @@ const JoinGroupScreen = () => {
 					containerStyle={appStyles.button}
 				/>
 				{groupStatus === 'old' ? (
-					<TextInput
+					<Input
 						placeholder="הכנס את קוד הקבוצה"
 						value={group.id}
 						onChangeText={(input) => setGroup({ ...group, id: input })}
@@ -130,12 +142,13 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 	},
 	intro1: {
-		fontSize: 20,
-		margin: 5,
+		fontSize: 24,
+		marginHorizontal: 10,
 		textAlign: 'center',
+		fontWeight: 'bold',
 	},
 	intro2: {
-		fontSize: 18,
+		fontSize: 20,
 		margin: 5,
 		textAlign: 'center',
 	},
@@ -143,6 +156,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		top: Dimensions.get('window').height * 0.2,
 		position: 'absolute',
+		width: Dimensions.get('window').width * 0.7,
 	},
 	input: {
 		textAlign: 'center',

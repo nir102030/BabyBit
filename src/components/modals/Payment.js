@@ -9,10 +9,10 @@ const Payment = ({ totalPayment, payment, setPayment }) => {
 		<>
 			<View style={styles.headerContainer}>
 				<Text style={styles.title}>הוספת תשלום</Text>
-				<Text>סה"כ לתשלום: {totalPayment}</Text>
+				<Text style={styles.totalPaymentText}>סה"כ נותר לשלם: {totalPayment} ש"ח</Text>
 			</View>
 			<View style={styles.paymentMethodContainer}>
-				<Text style={styles.paymentMethodTitle}>בחר צורת תשלום</Text>
+				<Text style={styles.paymentMethodTitle}>כמה שילמתי?</Text>
 				<View style={styles.paymentMethod}>
 					<Button
 						title="כל הסכום"
@@ -34,7 +34,7 @@ const Payment = ({ totalPayment, payment, setPayment }) => {
 						<Input placeholder="הזן סכום לתשלום" onChangeText={(input) => setPayment(parseInt(input))} />
 					) : null}
 				</View>
-				<Text style={styles.toPay}>לתשלום: {payment} שקלים</Text>
+				<Text style={styles.toPay}>שילמתי {payment} שקלים</Text>
 			</View>
 		</>
 	) : (
@@ -52,18 +52,22 @@ const styles = StyleSheet.create({
 
 	title: {
 		fontWeight: 'bold',
-		fontSize: 20,
+		fontSize: 24,
+	},
+	totalPaymentText: {
+		fontSize: 18,
+		marginTop: 5,
 	},
 
 	paymentMethodContainer: {
-		//marginTop: 15,
 		alignItems: 'center',
 		flex: 4,
 	},
 
 	paymentMethodTitle: {
-		marginTop: 10,
-		fontSize: 16,
+		marginTop: 40,
+		marginBottom: 5,
+		fontSize: 18,
 		fontWeight: 'bold',
 		flex: 0.5,
 	},
@@ -71,13 +75,11 @@ const styles = StyleSheet.create({
 	paymentMethod: {
 		flexDirection: 'row',
 		justifyContent: 'space-around',
-		//marginVertical: 10,
 		width: Dimensions.get('window').width * 0.5,
 		flex: 1,
 	},
 
 	payment: {
-		//marginTop: 20,
 		flex: 1,
 		width: Dimensions.get('window').width * 0.6,
 		justifyContent: 'center',

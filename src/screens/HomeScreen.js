@@ -9,6 +9,11 @@ import moment from 'moment';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as ShiftsContext } from '../context/ShiftContext';
 import { Context as GroupContext } from '../context/GroupContext';
+import {
+	sendNewShiftNotification,
+	sendPaymentNotification,
+	sendShiftRemvoalNotification,
+} from '../api/notificationsApi';
 
 const HomeScreen = () => {
 	const scrollViewRef = useRef();
@@ -46,7 +51,7 @@ const HomeScreen = () => {
 			type: 'payment',
 			visible: true,
 			hideModal: hideModal,
-			submitButtonText: payments.totalPayment > 0 ? 'שלם' : 'מצוין :) ביי',
+			submitButtonText: payments.totalPayment > 0 ? 'תעד תשלום' : 'מצוין :) ביי',
 		});
 	};
 
@@ -74,7 +79,7 @@ const HomeScreen = () => {
 
 	const validateShift = () => {
 		const shiftHoursDiff = moment(shift.to).diff(moment(shift.from), 'hours');
-		return shiftHoursDiff < 0 ? 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה' : null;
+		return shiftHoursDiff <= 0 ? 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה' : null;
 	};
 
 	//the alert pops up when trying to delete a shift
@@ -87,6 +92,7 @@ const HomeScreen = () => {
 					text: 'כן, הסר משמרת',
 					onPress: () => {
 						removeShift(shifts, shift);
+						sendShiftRemvoalNotification(state.user, shift, group);
 					},
 				},
 				{ text: 'לא, בטל פעולה' },
@@ -95,11 +101,24 @@ const HomeScreen = () => {
 		);
 	};
 
+	const addShiftAlert = () => {
+		Alert.alert('', 'תודה! המשמרת נוספה לרשימת המשמרות הפתוחות והתשלום הנדרש התעדכן');
+	};
+
+	const addPaymentAlert = () => {
+		Alert.alert('', 'תודה! התשלום תועד והמשמרות ששולמו הועברו לרשימת המשמרות ששולמו');
+	};
+
 	//submit handler for the shift and payment submission
 	const onModalSubmit = () => {
-		if (modal.type == 'shift') addShift(group, shifts, shift);
-		else {
+		if (modal.type == 'shift') {
+			addShiftAlert();
+			addShift(group, shifts, shift, state.user.name);
+			sendNewShiftNotification(state.user, group); //send notification to all the group participants
+		} else {
+			addPaymentAlert();
 			setPaidShifts(shifts, payment);
+			sendPaymentNotification(state.user, payment, group); //send notification to all the group participants
 			setPayment(0);
 		}
 	};
@@ -126,7 +145,7 @@ const HomeScreen = () => {
 				/>
 				{state.user.type === 'parent' ? (
 					<Button
-						title="לתשלום"
+						title="תעד תשלום"
 						containerStyle={styles.buttonContainer}
 						buttonStyle={styles.button}
 						onPress={() => showPaymentModal()}

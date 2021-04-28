@@ -1,12 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Dimensions } from 'react-native';
-import { View, Text, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, Alert, Image, Switch } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
 
 const ProfileScreen = () => {
 	const { state, signout, editUser } = useContext(AuthContext);
+	const toggleSwitch = () => editUser({ ...state.user, notificationsEnabled: !state.user.notificationsEnabled });
 
 	const signoutAlert = () => {
 		Alert.alert('היי', 'אתה בטוח שברצונך להתנתק?', [
@@ -20,6 +21,17 @@ const ProfileScreen = () => {
 			<View style={styles.imageContainer}>
 				<Image source={{ uri: state.user.image }} style={styles.image} />
 				<Text style={styles.name}>{state.user.name}</Text>
+			</View>
+			<View style={styles.notifications}>
+				<Text style={styles.notificationText}>הפעל התראות</Text>
+				<Switch
+					trackColor={{ false: '#767577', true: '#81b0ff' }}
+					thumbColor={state.user.notificationsEnabled ? '#f5dd4b' : '#f4f3f4'}
+					ios_backgroundColor="#3e3e3e"
+					onValueChange={toggleSwitch}
+					value={state.user.notificationsEnabled}
+					style={styles.notificationsSwitch}
+				/>
 			</View>
 			<View style={styles.signout}>
 				<Button title="התנתק" onPress={() => signoutAlert()} buttonStyle={appStyles.button} />
@@ -53,7 +65,16 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		marginTop: 10,
 	},
+	notifications: {
+		flexDirection: 'row-reverse',
+		marginTop: 20,
+	},
+	notificationText: {
+		fontSize: 24,
+		marginLeft: 20,
+	},
+	notificationsSwitch: {},
 	signout: {
-		top: Dimensions.get('window').height * 0.5,
+		top: Dimensions.get('window').height * 0.35,
 	},
 });

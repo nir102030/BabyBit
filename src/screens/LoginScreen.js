@@ -1,47 +1,69 @@
 import React, { useState, useContext } from 'react';
 import { Dimensions } from 'react-native';
-import { View, TextInput, StyleSheet, Text } from 'react-native';
-import { Button } from 'react-native-elements';
+import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { Button, Input } from 'react-native-elements';
 import GoogleSignIn from '../components/GoogleSignIn';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
+import { Entypo } from '@expo/vector-icons';
 
 const LoginScreen = ({ navigation }) => {
-	const { state, signin, clearError } = useContext(AuthContext);
+	const { state, signin, clearError, setLoading } = useContext(AuthContext);
 	const [userName, setUserName] = useState('');
 	const [password, setPassword] = useState('');
+	const [showPass, setShowPass] = useState(false);
 
 	const handleSignin = async () => {
+		setLoading(true);
+		signin(userName, password);
+	};
+
+	const handleGoogleSignin = async (userName, password) => {
+		setLoading(true);
 		signin(userName, password);
 	};
 
 	const handleError = () => {
-		alert(state.err);
-		clearError();
+		Alert.alert('', state.err, [{ text: 'הבנתי', onPress: clearError() }]);
 	};
 
-	return (
+	return state.loading ? (
+		<View style={{ flex: 1, justifyContent: 'center' }}>
+			<ActivityIndicator size="large" color="pink" />
+		</View>
+	) : (
 		<View style={styles.container}>
-			{state.err ? handleError() : null}
+			{state.err ? handleError(clearError) : null}
+			<View style={styles.googleSigninContainer}>
+				<GoogleSignIn handleSignin={handleGoogleSignin} />
+			</View>
+			<Text style={styles.orText}>או</Text>
 			<View style={styles.emailSigninContainer}>
-				<TextInput
+				<Input
 					placeholder="הכנס שם משתמש"
 					value={userName}
 					onChangeText={(value) => setUserName(value)}
 					style={appStyles.input}
 				/>
-				<TextInput
+				<Input
 					placeholder="הכנס סיסמא"
 					value={password}
 					onChangeText={(value) => setPassword(value)}
 					style={appStyles.input}
-					secureTextEntry={true}
+					secureTextEntry={!showPass}
+					leftIcon={() =>
+						showPass ? (
+							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
+								<Entypo name="eye-with-line" size={24} color="black" />
+							</TouchableOpacity>
+						) : (
+							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
+								<Entypo name="eye" size={24} color="black" />
+							</TouchableOpacity>
+						)
+					}
 				/>
 				<Button title="כנס לחשבון" onPress={() => handleSignin()} containerStyle={appStyles.button} />
-			</View>
-			<Text style={styles.orText}>או</Text>
-			<View style={styles.googleSigninContainer}>
-				<GoogleSignIn signin={signin} />
 			</View>
 			<View style={styles.buttonsContainer}>
 				<Button
@@ -71,18 +93,18 @@ const styles = StyleSheet.create({
 	emailSigninContainer: {
 		alignItems: 'center',
 		position: 'absolute',
-		top: Dimensions.get('window').height * 0.02,
+		top: Dimensions.get('window').height * 0.25,
 	},
 	googleSigninContainer: {
 		alignItems: 'center',
 		position: 'absolute',
-		top: Dimensions.get('window').height * 0.33,
+		top: Dimensions.get('window').height * 0.02,
 	},
 	orText: {
 		fontSize: 26,
 		fontWeight: 'bold',
 		position: 'absolute',
-		top: Dimensions.get('window').height * 0.28,
+		top: Dimensions.get('window').height * 0.17,
 	},
 	buttonsContainer: {
 		position: 'absolute',

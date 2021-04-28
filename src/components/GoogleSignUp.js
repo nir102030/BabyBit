@@ -1,8 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, Image, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Image, Text, StyleSheet, Dimensions } from 'react-native';
 import * as Google from 'expo-google-app-auth';
 
-const GoogleSignUp = ({ signup, userType, navigation }) => {
+const GoogleSignUp = ({ handleSignup, navigation }) => {
 	const googleConfig = {
 		androidClientId: '525239721755-n2t92e65qolbetvqc0sngt8occn5p19i.apps.googleusercontent.com',
 		androidStandaloneAppClientId: '525239721755-nsddhp6fpshtemf6bfnn9fkd7v0mtopr.apps.googleusercontent.com',
@@ -11,8 +11,7 @@ const GoogleSignUp = ({ signup, userType, navigation }) => {
 	const signUpWithGoogle = async () => {
 		const { type, user } = await Google.logInAsync(googleConfig);
 		if (type === 'success') {
-			signup(user.email, user.id, user.name, userType, user.photoUrl);
-			navigation.navigate('Login');
+			handleSignup(user.email, user.id, user.name, user.photoUrl);
 		}
 	};
 
@@ -34,6 +33,7 @@ const styles = StyleSheet.create({
 		margin: 20,
 		padding: 10,
 		alignItems: 'center',
+		justifyContent: 'center',
 		shadowColor: '#000',
 		shadowOffset: {
 			width: 0,
@@ -42,14 +42,16 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
+		width: Dimensions.get('window').width * 0.7,
 	},
 	img: {
-		height: 25,
-		width: 25,
-		borderRadius: 25,
+		height: 35,
+		width: 35,
+		borderRadius: 35,
 		marginRight: 20,
 	},
 	text: {
-		fontSize: 20,
+		fontSize: 22,
+		fontWeight: 'bold',
 	},
 });

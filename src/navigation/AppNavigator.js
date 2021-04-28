@@ -1,21 +1,20 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { View, Text, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, CommonActions, useNavigation } from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
 import JoinGroupScreen from '../screens/JoinGroupScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import PaidShiftsScreen from '../screens/PaidShiftsScreen';
 import GroupScreen from '../screens/GroupScreen';
-import { Icon } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { Dimensions } from 'react-native';
+import * as Notifications from 'expo-notifications';
 
 const AppNavigator = () => {
 	const { state, tryLocalSignin } = useContext(AuthContext);
@@ -23,24 +22,58 @@ const AppNavigator = () => {
 	const { getGroup, setLoading } = groupContext;
 	const groupState = groupContext.state;
 
+	Notifications.setNotificationHandler({
+		handleNotification: async () => ({
+			shouldShowAlert: true,
+			shouldPlaySound: true,
+			shouldSetBadge: true,
+		}),
+	});
+
+	const notificationListener = useRef();
+	const responseListener = useRef();
+
+	const initiateParams = async () => {
+		const user = await tryLocalSignin();
+		if (user) {
+			getGroup(user.groupId);
+		} else {
+			setLoading(false);
+		}
+	};
+
 	useEffect(() => {
-		const initiateParams = async () => {
-			const user = await tryLocalSignin();
-			if (user) {
-				getGroup(user.groupId);
-			} else {
-				setLoading(false);
-			}
-		};
 		initiateParams();
 	}, []);
 
+	useEffect(() => {
+		// This listener is fired whenever a notification is received while the app is foregrounded
+		notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {});
+
+		// This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+		responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+			console.log(response);
+		});
+
+		return () => {
+			Notifications.removeNotificationSubscription(notificationListener.current);
+			Notifications.removeNotificationSubscription(responseListener.current);
+		};
+	}, []);
+
 	const Stack = createStackNavigator();
-	const Drawer = createDrawerNavigator();
+	// const Drawer = createDrawerNavigator();
+	const Tab = createBottomTabNavigator();
 
 	const headerTitle = () => {
 		return (
-			<View>
+			<View
+				style={{
+					flex: 1,
+					alignItems: 'center',
+					width: Dimensions.get('window').width,
+				}}
+			>
 				<View
 					style={{
 						flex: 1,
@@ -55,6 +88,7 @@ const AppNavigator = () => {
 						BabyBit
 					</Text>
 				</View>
+				{/* <Text style={{ fontSize: 20, fontWeight: 'bold', padding: 5 }}>משמרות פתוחות</Text> */}
 			</View>
 		);
 	};
@@ -76,21 +110,11 @@ const AppNavigator = () => {
 		);
 	};
 
-	const options = ({ navigation }) => {
+	const options = () => {
 		return {
 			headerTitle: headerTitle,
 			headerTitleStyle: { flex: 1, alignSelf: 'center' },
 			headerTitleContainerStyle: { left: 0, zIndex: 1 },
-			headerRightContainerStyle: { marginHorizontal: 10, zIndex: 2 },
-			headerRight: () => (
-				<Icon
-					name="menu"
-					type="material"
-					size={30}
-					style={{ marginLeft: 10 }}
-					onPress={() => navigation.openDrawer()}
-				/>
-			),
 			headerLeft: headerLeft,
 		};
 	};
@@ -155,6 +179,37 @@ const AppNavigator = () => {
 		);
 	};
 
+	const tabBarOptions = {
+		tabStyle: {
+			justifyContent: 'center',
+			borderRightWidth: 0.5,
+			borderRightColor: 'rgba(0,0,0,0.2)',
+		},
+		labelStyle: {
+			fontSize: 14,
+			fontWeight: 'bold',
+		},
+		// style: { position: 'absolute' },
+	};
+
+	const tabBarScreenOptions = ({ route }) => ({
+		tabBarIcon: () => {
+			if (route.name == 'הקבוצה שלי')
+				return <FontAwesome name="group" size={24} color="blue" style={{ opacity: 0.5 }} />;
+			if (route.name == 'משמרות ששולמו')
+				return <MaterialIcons name="payment" size={24} color="green" style={{ opacity: 0.5 }} />;
+			if (route.name == 'משמרות פתוחות')
+				return (
+					<MaterialCommunityIcons
+						name="baby-bottle-outline"
+						size={24}
+						color="purple"
+						style={{ opacity: 0.5 }}
+					/>
+				);
+		},
+	});
+
 	return state.loading || groupState.loading ? (
 		<View style={{ flex: 1, justifyContent: 'center' }}>
 			<ActivityIndicator size="large" color="pink" />
@@ -164,11 +219,15 @@ const AppNavigator = () => {
 			{!state.token ? (
 				loginStack()
 			) : state.user.groupId && groupState.group ? (
-				<Drawer.Navigator initialRouteName="Home" drawerPosition="right">
-					<Drawer.Screen name="משמרות פתוחות" component={HomeStack} />
-					<Drawer.Screen name="משמרות ששולמו" component={PaidShiftsStack} />
-					<Drawer.Screen name="הקבוצה שלי" component={SettingsStack} />
-				</Drawer.Navigator>
+				<Tab.Navigator
+					initialRouteName="משמרות פתוחות"
+					tabBarOptions={tabBarOptions}
+					screenOptions={tabBarScreenOptions}
+				>
+					<Tab.Screen name="הקבוצה שלי" component={SettingsStack} />
+					<Tab.Screen name="משמרות ששולמו" component={PaidShiftsStack} />
+					<Tab.Screen name="משמרות פתוחות" component={HomeStack} />
+				</Tab.Navigator>
 			) : (
 				<Stack.Navigator>
 					<Stack.Screen

@@ -1,22 +1,40 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, StyleSheet, Text, Dimensions, Image } from 'react-native';
-import { Button } from 'react-native-elements';
+import { View, StyleSheet, Text, Dimensions, Image, TouchableOpacity, Alert } from 'react-native';
+import { Button, Input } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
 import ImagePicker from '../components/ImagePicker';
 import alternateProfilePic from '../assets/alternateProfilePic.webp';
 import GoogleSignUp from '../components/GoogleSignUp';
+import { Entypo, FontAwesome5 } from '@expo/vector-icons';
 
 const SignupScreen = ({ navigation }) => {
-	const { state, signup, clearError } = useContext(AuthContext);
+	const { state, signup, clearError, setLoading } = useContext(AuthContext);
 	const [userName, setUserName] = useState('');
 	const [password, setPassword] = useState('');
 	const [name, setName] = useState('');
 	const [type, setType] = useState('parent');
 	const [img, setImg] = useState(null);
+	const [showPass, setShowPass] = useState(false);
 
 	const handleSignup = async () => {
+		setLoading(true);
+		const token = await signup(
+			userName,
+			password,
+			name,
+			type,
+			img ? img : Image.resolveAssetSource(alternateProfilePic).uri,
+			true
+		);
+		if (token) {
+			navigation.navigate('Login');
+		}
+	};
+
+	const handleGoogleSignup = async (userName, password, name, img) => {
+		setLoading(true);
 		const token = await signup(
 			userName,
 			password,
@@ -30,11 +48,14 @@ const SignupScreen = ({ navigation }) => {
 	};
 
 	const handleError = () => {
-		alert(state.err);
-		clearError();
+		Alert.alert('', state.err, [{ text: 'הבנתי', onPress: clearError() }]);
 	};
 
-	return (
+	return state.loading ? (
+		<View style={{ flex: 1, justifyContent: 'center' }}>
+			<ActivityIndicator size="large" color="pink" />
+		</View>
+	) : (
 		<View style={styles.container}>
 			{state.err ? handleError() : null}
 			<View style={styles.pickerContainer}>
@@ -45,24 +66,30 @@ const SignupScreen = ({ navigation }) => {
 				</Picker>
 			</View>
 			<View style={styles.googleSigninContainer}>
-				<GoogleSignUp signup={signup} userType={type} navigation={navigation} />
+				<GoogleSignUp handleSignup={handleGoogleSignup} navigation={navigation} />
 			</View>
 			<Text style={styles.orText}>או</Text>
 			<View style={styles.inputsContainer}>
-				<TextInput
-					placeholder="בחר שם משתמש"
-					value={userName}
-					onChangeText={setUserName}
-					style={appStyles.input}
-				/>
-				<TextInput
+				<Input placeholder="בחר שם משתמש" value={userName} onChangeText={setUserName} style={appStyles.input} />
+				<Input
 					placeholder="בחר סיסמא"
 					value={password}
 					onChangeText={setPassword}
 					style={appStyles.input}
-					secureTextEntry={true}
+					secureTextEntry={!showPass}
+					leftIcon={() =>
+						showPass ? (
+							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
+								<Entypo name="eye-with-line" size={24} color="black" />
+							</TouchableOpacity>
+						) : (
+							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
+								<Entypo name="eye" size={24} color="black" />
+							</TouchableOpacity>
+						)
+					}
 				/>
-				<TextInput placeholder="מה שמך?" value={name} onChangeText={setName} style={appStyles.input} />
+				<Input placeholder="מה שמך?" value={name} onChangeText={setName} style={appStyles.input} />
 				{/* <View>
 					<ImagePicker setUserImage={setImg} />
 				</View> */}
@@ -109,12 +136,13 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: 'bold',
 		position: 'absolute',
-		top: Dimensions.get('window').height * 0.25,
+		top: Dimensions.get('window').height * 0.27,
 	},
 	inputsContainer: {
 		alignItems: 'center',
-		top: Dimensions.get('window').height * 0.3,
+		top: Dimensions.get('window').height * 0.35,
 		position: 'absolute',
+		width: Dimensions.get('window').width * 0.7,
 	},
 	buttonsContainer: {
 		top: Dimensions.get('window').height * 0.75,

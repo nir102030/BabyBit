@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Alert, Dimensions, Share, Image } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Alert, Dimensions, Share, Image } from 'react-native';
 import { Button, Card } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
@@ -47,11 +47,21 @@ const GroupScreen = () => {
 	};
 
 	const renderParticipants = () => {
-		return group.participants.map((user, index) => {
+		//create a new participants array with the current user in the start of it
+		let sortedParticipants = [];
+		group.participants.forEach((participant) => {
+			if (participant.userName == state.user.userName) sortedParticipants.unshift(participant);
+			else sortedParticipants.push(participant);
+		});
+
+		//create a participant row for each of them
+		return sortedParticipants.map((user, index) => {
 			return (
 				<View key={index} style={styles.participant}>
 					<Image source={{ uri: user.image }} style={styles.userImg} />
-					<Text style={styles.participantName}>{user.name}</Text>
+					<Text style={styles.participantName}>
+						{state.user.userName == user.userName ? 'את/ה' : user.name}
+					</Text>
 					{user.type == 'parent' ? (
 						<Fontisto name="persons" size={25} color="green" style={styles.userIcon} />
 					) : (
@@ -63,7 +73,7 @@ const GroupScreen = () => {
 	};
 
 	return (
-		<View style={styles.container}>
+		<ScrollView contentContainerStyle={styles.container}>
 			<Card containerStyle={styles.groupDetailsContainer}>
 				<SettingsDetail
 					fieldName="שם הקבוצה"
@@ -101,7 +111,7 @@ const GroupScreen = () => {
 					buttonStyle={[appStyles.button, { marginBottom: 40 }]}
 				/>
 			</View>
-		</View>
+		</ScrollView>
 	);
 };
 
@@ -115,11 +125,11 @@ const styles = StyleSheet.create({
 	groupDetailsContainer: {
 		width: Dimensions.get('window').width * 0.9,
 		justifyContent: 'center',
-		marginTop: Dimensions.get('window').height * 0.05,
+		marginTop: Dimensions.get('window').height * 0.02,
 	},
 	participantsContainer: {
 		width: Dimensions.get('window').width * 0.9,
-		marginTop: Dimensions.get('window').height * 0.05,
+		marginTop: Dimensions.get('window').height * 0.03,
 	},
 	participantsHeader: {
 		flexDirection: 'row-reverse',
@@ -128,7 +138,7 @@ const styles = StyleSheet.create({
 	},
 	participantsTitle: {
 		fontWeight: 'bold',
-		fontSize: 22,
+		fontSize: 20,
 	},
 	shareButtonContainer: {
 		flexDirection: 'row-reverse',
@@ -165,7 +175,6 @@ const styles = StyleSheet.create({
 		flex: 2,
 	},
 	changeGroupBtn: {
-		position: 'absolute',
-		top: Dimensions.get('window').height * 0.8,
+		marginTop: Dimensions.get('window').height * 0.03,
 	},
 });

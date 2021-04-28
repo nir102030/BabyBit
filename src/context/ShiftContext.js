@@ -110,7 +110,6 @@ const setPaidShifts = (dispatch) => (shifts, paied) => {
 			return { ...shift, paied: shift.paied + amountCanPay }; //return the updated shift
 		} else return shift; //else return the original shift
 	});
-
 	const updatedShifts = [...shiftsAlreadyFullyPaied, ...paidShifts];
 
 	dispatch({

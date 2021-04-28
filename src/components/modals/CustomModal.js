@@ -22,6 +22,7 @@ const CustomModal = ({ modal, children, onSubmit, validation }) => {
 				<Button
 					title={submitButtonText}
 					containerStyle={styles.button}
+					buttonStyle={styles.button}
 					onPress={() => {
 						const err = validation();
 						if (err) alert(err);
@@ -71,7 +72,6 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		justifyContent: 'center',
 		borderRadius: 5,
-		borderWidth: 1,
 		borderColor: 'lightgrey',
 		width: Dimensions.get('window').width * 0.4,
 		backgroundColor: '#2196F3',

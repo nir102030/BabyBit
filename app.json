@@ -28,11 +28,13 @@
 				"googleSignIn": {
 					"certificateHash": "C078EC10096DC3B16B77B1E0883663CA6E141448"
 				}
-			}
+			},
+			"googleServicesFile": "./google-services.json"
 		},
 		"web": {
 			"favicon": "./assets/icon.png"
 		},
+		"scheme": "babybit",
 		"description": "A simple app for managing the shifts and payment of the caregiver/babysitter",
 		"githubUrl": "https://github.com/nir102030/BabyBit"
 	}
