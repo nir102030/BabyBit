@@ -36,6 +36,22 @@
 		},
 		"scheme": "babybit",
 		"description": "A simple app for managing the shifts and payment of the caregiver/babysitter",
-		"githubUrl": "https://github.com/nir102030/BabyBit"
+		"githubUrl": "https://github.com/nir102030/BabyBit",
+		"packagerOpts": {
+			"config": "metro.config.js",
+			"sourceExts": [
+				"expo.ts",
+				"expo.tsx",
+				"expo.js",
+				"expo.jsx",
+				"ts",
+				"tsx",
+				"js",
+				"jsx",
+				"json",
+				"wasm",
+				"svg"
+			]
+		}
 	}
 }

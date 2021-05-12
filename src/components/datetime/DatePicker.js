@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import moment from 'moment';
 import { Icon } from 'react-native-elements';
 
-const DatePicker = ({ date, setDate }) => {
+const DatePicker = ({ date, setDate, isInputRecieved, setIsInputRecieved }) => {
 	const [show, setShow] = useState(false);
 
-	const onChange = (event, selectedDate) => {
+	const onChange = (selectedDate) => {
+		const { timestamp } = selectedDate.nativeEvent;
+		const chosenDate = timestamp ? new Date(timestamp) : date;
 		setShow(false);
-		setDate(selectedDate ? selectedDate : date);
+		setIsInputRecieved(true);
+		setDate(chosenDate);
 	};
 
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity onPress={() => setShow(true)} style={styles.dateIconContainer}>
-				<Icon name="date" type="fontisto" size={30} color="#900" style={styles.dateIcon} />
-				<Text style={styles.text}>{moment(date).format('DD-MM-YYYY')}</Text>
+				<Icon name="date" type="fontisto" size={30} color="rgba(0,0,0,0.5)" style={styles.dateIcon} />
+				{isInputRecieved ? (
+					<Text style={styles.text}>{moment(date).format('DD-MM-YYYY')}</Text>
+				) : (
+					<Text style={styles.placeholder}>בחר תאריך המשמרת</Text>
+				)}
 			</TouchableOpacity>
 			{show && (
 				<DateTimePicker
@@ -35,20 +42,21 @@ const DatePicker = ({ date, setDate }) => {
 export default DatePicker;
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
+	container: {},
 	dateIconContainer: {
-		flex: 2,
 		alignItems: 'center',
 		flexDirection: 'row-reverse',
 	},
 	dateIcon: {
 		justifyContent: 'center',
-		marginRight: Dimensions.get('window').width * 0.3,
+		marginLeft: 15,
 	},
 	text: {
-		fontWeight: 'bold',
-		marginRight: Dimensions.get('window').width * 0.1,
+		fontSize: 14,
+		color: 'rgba(0,0,0,0.5)',
+	},
+	placeholder: {
+		color: 'rgba(0,0,0,0.4)',
+		fontSize: 14,
 	},
 });

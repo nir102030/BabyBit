@@ -1,39 +1,39 @@
 {
-	"project_info": {
-		"project_number": "373821387941",
-		"project_id": "babybit-a03b8",
-		"storage_bucket": "babybit-a03b8.appspot.com"
-	},
-	"client": [
-		{
-			"client_info": {
-				"mobilesdk_app_id": "1:373821387941:android:e171d999f175a6a909094c",
-				"android_client_info": {
-					"package_name": "com.nirkatz.babybit"
-				}
-			},
-			"oauth_client": [
-				{
-					"client_id": "373821387941-rhgvjf10u6cmodbv3c06sk8g9cjr927h.apps.googleusercontent.com",
-					"client_type": 3
-				}
-			],
-			"api_key": [
-				{
-					"current_key": "AIzaSyCHcMM_DUK-Uyp8yyGGLcIAKYXuWQAI674"
-				}
-			],
-			"services": {
-				"appinvite_service": {
-					"other_platform_oauth_client": [
-						{
-							"client_id": "373821387941-rhgvjf10u6cmodbv3c06sk8g9cjr927h.apps.googleusercontent.com",
-							"client_type": 3
-						}
-					]
-				}
-			}
-		}
-	],
-	"configuration_version": "1"
+  "project_info": {
+    "project_number": "373821387941",
+    "project_id": "babybit-a03b8",
+    "storage_bucket": "babybit-a03b8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:373821387941:android:4000144cf2d2e74709094c",
+        "android_client_info": {
+          "package_name": "com.nirkatz.babybit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "373821387941-rhgvjf10u6cmodbv3c06sk8g9cjr927h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHcMM_DUK-Uyp8yyGGLcIAKYXuWQAI674"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "373821387941-rhgvjf10u6cmodbv3c06sk8g9cjr927h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
 }

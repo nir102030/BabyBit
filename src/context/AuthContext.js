@@ -47,25 +47,30 @@ const signin = (dispatch) => async (userName, password) => {
 			type: 'signin',
 			payload: { token: response.data.token, user: response.data.user },
 		});
+		return response.data.user;
 	} catch (err) {
+		const errMsg = err.response.data.error;
 		dispatch({
 			type: 'addErr',
-			payload: 'משהו השתבש בתהליך הכניסה. נסה שוב.',
+			payload: errMsg,
 		});
+		return null;
 	}
 };
 
-const signup = (dispatch) => async (userName, password, name, type, image, notificationsEnabled) => {
+const signup = (dispatch) => async (user) => {
+	//const { userName, password, name, type, image, groupId, expoPushToken, notificationsEnabled } = user;
 	try {
-		const token = await api.post('/signup', { userName, password, name, type, image, notificationsEnabled });
+		const token = await api.post('/signup', user);
 		dispatch({
 			type: 'clearError',
 		});
 		return token;
 	} catch (err) {
+		const errMsg = err.response.data.error;
 		dispatch({
 			type: 'addErr',
-			payload: 'משהו השתבש עם ההרשמה. נסה שוב',
+			payload: errMsg,
 		});
 		return null;
 	}

@@ -1,11 +1,15 @@
 import React, { useState, useContext } from 'react';
 import { Dimensions } from 'react-native';
-import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { Button, Input } from 'react-native-elements';
-import GoogleSignIn from '../components/GoogleSignIn';
+import GoogleSignIn from '../components/google/GoogleSignIn';
 import { Context as AuthContext } from '../context/AuthContext';
+import { Context as GroupContext } from '../context/GroupContext';
 import { styles as appStyles } from '../styles/styles';
 import { Entypo } from '@expo/vector-icons';
+import Loader from '../components/Loader';
+import BabyIcon from '../assets/BabyIcon';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const LoginScreen = ({ navigation }) => {
 	const { state, signin, clearError, setLoading } = useContext(AuthContext);
@@ -13,14 +17,19 @@ const LoginScreen = ({ navigation }) => {
 	const [password, setPassword] = useState('');
 	const [showPass, setShowPass] = useState(false);
 
+	const groupContext = useContext(GroupContext);
+	const { getGroup } = groupContext;
+
 	const handleSignin = async () => {
 		setLoading(true);
-		signin(userName, password);
+		const user = await signin(userName, password);
+		if (user) getGroup(user.groupId);
 	};
 
 	const handleGoogleSignin = async (userName, password) => {
 		setLoading(true);
-		signin(userName, password);
+		const user = await signin(userName, password);
+		if (user) getGroup(user.groupId);
 	};
 
 	const handleError = () => {
@@ -28,53 +37,49 @@ const LoginScreen = ({ navigation }) => {
 	};
 
 	return state.loading ? (
-		<View style={{ flex: 1, justifyContent: 'center' }}>
-			<ActivityIndicator size="large" color="pink" />
-		</View>
+		<Loader />
 	) : (
 		<View style={styles.container}>
-			{state.err ? handleError(clearError) : null}
-			<View style={styles.googleSigninContainer}>
+			<BabyIcon style={styles.babyIcon} />
+			<ScrollView contentContainerStyle={styles.scrollView}>
+				{state.err ? handleError(clearError) : null}
 				<GoogleSignIn handleSignin={handleGoogleSignin} />
-			</View>
-			<Text style={styles.orText}>או</Text>
-			<View style={styles.emailSigninContainer}>
-				<Input
-					placeholder="הכנס שם משתמש"
-					value={userName}
-					onChangeText={(value) => setUserName(value)}
-					style={appStyles.input}
-				/>
-				<Input
-					placeholder="הכנס סיסמא"
-					value={password}
-					onChangeText={(value) => setPassword(value)}
-					style={appStyles.input}
-					secureTextEntry={!showPass}
-					leftIcon={() =>
-						showPass ? (
-							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
-								<Entypo name="eye-with-line" size={24} color="black" />
-							</TouchableOpacity>
-						) : (
-							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
-								<Entypo name="eye" size={24} color="black" />
-							</TouchableOpacity>
-						)
-					}
-				/>
-				<Button title="כנס לחשבון" onPress={() => handleSignin()} containerStyle={appStyles.button} />
-			</View>
-			<View style={styles.buttonsContainer}>
+				<Text style={styles.orText}>או</Text>
+				<View style={styles.emailSigninContainer}>
+					<TextInput
+						placeholder="הכנס שם משתמש"
+						value={userName}
+						onChangeText={setUserName}
+						style={[appStyles.input, styles.input]}
+					/>
+					<View style={styles.passwordInputContainer}>
+						<TextInput
+							placeholder="הכנס סיסמא"
+							value={password}
+							onChangeText={setPassword}
+							secureTextEntry={!showPass}
+							style={[appStyles.input, styles.input]}
+						/>
+						<TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showPassIcon}>
+							<Entypo name={showPass ? 'eye-with-line' : 'eye'} size={24} color="black" />
+						</TouchableOpacity>
+					</View>
+					<Button
+						title="כנס לחשבון"
+						onPress={() => handleSignin()}
+						buttonStyle={appStyles.button}
+						containerStyle={{ marginTop: 10 }}
+					/>
+				</View>
 				<Button
 					title="לא רשום עדיין? עבור להרשמה"
 					onPress={() => {
 						clearError();
 						navigation.navigate('Signup');
 					}}
-					containerStyle={appStyles.button}
+					buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.35 }]}
 				/>
-			</View>
+			</ScrollView>
 		</View>
 	);
 };
@@ -83,31 +88,43 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
 	container: {
+		flex: 1,
+	},
+	scrollView: {
 		alignItems: 'center',
+	},
+	babyIcon: {
 		position: 'absolute',
+		top: 0,
 		left: 0,
 		right: 0,
-		top: 0,
 		bottom: 0,
+		opacity: 0.2,
+		backgroundColor: 'rgba(200,0,0,0.1)',
 	},
 	emailSigninContainer: {
 		alignItems: 'center',
-		position: 'absolute',
-		top: Dimensions.get('window').height * 0.25,
 	},
-	googleSigninContainer: {
-		alignItems: 'center',
-		position: 'absolute',
-		top: Dimensions.get('window').height * 0.02,
+	input: {
+		textAlign: 'center',
+		marginVertical: 10,
+		backgroundColor: 'rgba(200,0,0,0.1)',
+		borderRadius: 10,
+		padding: 5,
+		fontSize: 22,
+		color: 'rgba(0,0,0,0.7)',
 	},
 	orText: {
 		fontSize: 26,
 		fontWeight: 'bold',
-		position: 'absolute',
-		top: Dimensions.get('window').height * 0.17,
+		marginBottom: 20,
 	},
-	buttonsContainer: {
+	passwordInputContainer: {
+		flexDirection: 'row-reverse',
+		alignItems: 'center',
+	},
+	showPassIcon: {
 		position: 'absolute',
-		top: Dimensions.get('window').height * 0.8,
+		right: 5,
 	},
 });

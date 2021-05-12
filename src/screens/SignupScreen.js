@@ -1,33 +1,43 @@
-import React, { useState, useContext } from 'react';
-import { View, StyleSheet, Text, Dimensions, Image, TouchableOpacity, Alert } from 'react-native';
-import { Button, Input } from 'react-native-elements';
+import React, { useState, useContext, useRef, useEffect } from 'react';
+import {
+	View,
+	StyleSheet,
+	Text,
+	Dimensions,
+	Image,
+	TouchableOpacity,
+	Alert,
+	TextInput,
+	ScrollView,
+} from 'react-native';
+import { Button } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
 import ImagePicker from '../components/ImagePicker';
 import alternateProfilePic from '../assets/alternateProfilePic.webp';
-import GoogleSignUp from '../components/GoogleSignUp';
-import { Entypo, FontAwesome5 } from '@expo/vector-icons';
+import GoogleSignUp from '../components/google/GoogleSignUp';
+import { Entypo } from '@expo/vector-icons';
+import Loader from '../components/Loader';
+import BabyIcon from '../assets/BabyIcon';
 
 const SignupScreen = ({ navigation }) => {
 	const { state, signup, clearError, setLoading } = useContext(AuthContext);
-	const [userName, setUserName] = useState('');
-	const [password, setPassword] = useState('');
-	const [name, setName] = useState('');
-	const [type, setType] = useState('parent');
-	const [img, setImg] = useState(null);
 	const [showPass, setShowPass] = useState(false);
+	const [user, setUser] = useState({
+		userName: '',
+		password: '',
+		name: '',
+		type: 'parent',
+		image: Image.resolveAssetSource(alternateProfilePic).uri,
+		groupId: null,
+		expoPushToken: null,
+		notificationsEnabled: true,
+	});
 
 	const handleSignup = async () => {
 		setLoading(true);
-		const token = await signup(
-			userName,
-			password,
-			name,
-			type,
-			img ? img : Image.resolveAssetSource(alternateProfilePic).uri,
-			true
-		);
+		const token = await signup(user);
 		if (token) {
 			navigation.navigate('Login');
 		}
@@ -35,13 +45,7 @@ const SignupScreen = ({ navigation }) => {
 
 	const handleGoogleSignup = async (userName, password, name, img) => {
 		setLoading(true);
-		const token = await signup(
-			userName,
-			password,
-			name,
-			type,
-			img ? img : Image.resolveAssetSource(alternateProfilePic).uri
-		);
+		const token = await signup({ ...user, userName: userName, password: password, name: name, image: img });
 		if (token) {
 			navigation.navigate('Login');
 		}
@@ -51,57 +55,63 @@ const SignupScreen = ({ navigation }) => {
 		Alert.alert('', state.err, [{ text: 'הבנתי', onPress: clearError() }]);
 	};
 
+	const handleUserEdit = (key, value) => {
+		setUser({ ...user, [key]: value });
+	};
+
 	return state.loading ? (
-		<View style={{ flex: 1, justifyContent: 'center' }}>
-			<ActivityIndicator size="large" color="pink" />
-		</View>
+		<Loader />
 	) : (
 		<View style={styles.container}>
-			{state.err ? handleError() : null}
-			<View style={styles.pickerContainer}>
-				<Text style={styles.text}>בחר סוג משתמש</Text>
-				<Picker selectedValue={type} onValueChange={setType} style={appStyles.picker}>
-					<Picker.Item label="הורה" value="parent" color="rgba(0, 0, 0, 0.6)" />
-					<Picker.Item label="מטפל/ת" value="caregiver" color="rgba(0, 0, 0, 0.6)" />
-				</Picker>
-			</View>
-			<View style={styles.googleSigninContainer}>
+			<BabyIcon style={styles.babyIcon} />
+			<ScrollView contentContainerStyle={styles.scrollView}>
+				{state.err ? handleError() : null}
+				<View style={styles.pickerContainer}>
+					<Text style={styles.text}>בחר סוג משתמש</Text>
+					<Picker selectedValue={user.type} onValueChange={(value) => handleUserEdit('type', value)}>
+						<Picker.Item label="הורה" value="parent" color="rgba(0, 0, 0, 0.6)" />
+						<Picker.Item label="מטפל/ת" value="caregiver" color="rgba(0, 0, 0, 0.6)" />
+					</Picker>
+				</View>
 				<GoogleSignUp handleSignup={handleGoogleSignup} navigation={navigation} />
-			</View>
-			<Text style={styles.orText}>או</Text>
-			<View style={styles.inputsContainer}>
-				<Input placeholder="בחר שם משתמש" value={userName} onChangeText={setUserName} style={appStyles.input} />
-				<Input
-					placeholder="בחר סיסמא"
-					value={password}
-					onChangeText={setPassword}
-					style={appStyles.input}
-					secureTextEntry={!showPass}
-					leftIcon={() =>
-						showPass ? (
-							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
-								<Entypo name="eye-with-line" size={24} color="black" />
-							</TouchableOpacity>
-						) : (
-							<TouchableOpacity onPress={() => setShowPass(!showPass)}>
-								<Entypo name="eye" size={24} color="black" />
-							</TouchableOpacity>
-						)
-					}
+				<Text style={styles.orText}>או</Text>
+				<View style={styles.inputsContainer}>
+					<TextInput
+						placeholder="בחר שם משתמש"
+						value={user.userName}
+						onChangeText={(value) => handleUserEdit('userName', value)}
+						style={[appStyles.input, styles.input]}
+					/>
+					<View style={styles.passwordInputContainer}>
+						<TextInput
+							placeholder="בחר סיסמא"
+							value={user.password}
+							onChangeText={(value) => handleUserEdit('password', value)}
+							secureTextEntry={!showPass}
+							style={[appStyles.input, styles.input]}
+						/>
+						<TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showPassIcon}>
+							<Entypo name={showPass ? 'eye-with-line' : 'eye'} size={24} color="black" />
+						</TouchableOpacity>
+					</View>
+					<TextInput
+						placeholder="מה שמך?"
+						value={user.name}
+						onChangeText={(value) => handleUserEdit('name', value)}
+						style={[appStyles.input, styles.input]}
+					/>
+				</View>
+				<Button
+					title="הרשם"
+					onPress={() => handleSignup()}
+					buttonStyle={[appStyles.button, { marginTop: 10 }]}
 				/>
-				<Input placeholder="מה שמך?" value={name} onChangeText={setName} style={appStyles.input} />
-				{/* <View>
-					<ImagePicker setUserImage={setImg} />
-				</View> */}
-			</View>
-			<View style={styles.buttonsContainer}>
-				<Button title="הרשם" onPress={() => handleSignup()} containerStyle={appStyles.button} />
 				<Button
 					title="כבר רשום? כנס לחשבון"
 					onPress={() => navigation.navigate('Login')}
-					containerStyle={appStyles.button}
+					buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.15 }]}
 				/>
-			</View>
+			</ScrollView>
 		</View>
 	);
 };
@@ -110,12 +120,19 @@ export default SignupScreen;
 
 const styles = StyleSheet.create({
 	container: {
+		flex: 1,
+	},
+	scrollView: {
 		alignItems: 'center',
+	},
+	babyIcon: {
 		position: 'absolute',
+		top: 0,
 		left: 0,
 		right: 0,
-		top: 0,
 		bottom: 0,
+		opacity: 0.2,
+		backgroundColor: 'rgba(200,0,0,0.1)',
 	},
 	pickerContainer: {
 		width: Dimensions.get('window').width * 0.7,
@@ -123,37 +140,37 @@ const styles = StyleSheet.create({
 		borderColor: 'rgba(0, 0, 0, 0.2)',
 		borderRadius: 3,
 		padding: 5,
-		margin: 10,
-		top: Dimensions.get('window').height * 0.02,
-		position: 'absolute',
-	},
-	googleSigninContainer: {
-		alignItems: 'center',
-		position: 'absolute',
-		top: Dimensions.get('window').height * 0.15,
-	},
-	orText: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		position: 'absolute',
-		top: Dimensions.get('window').height * 0.27,
-	},
-	inputsContainer: {
-		alignItems: 'center',
-		top: Dimensions.get('window').height * 0.35,
-		position: 'absolute',
-		width: Dimensions.get('window').width * 0.7,
-	},
-	buttonsContainer: {
-		top: Dimensions.get('window').height * 0.75,
-		position: 'absolute',
+		marginTop: 20,
+		borderRadius: 10,
 	},
 	text: {
 		fontSize: 18,
 		color: 'rgba(0, 0, 0, 0.7)',
+		fontWeight: 'bold',
 	},
-	picker: {
-		borderWidth: 1,
-		color: 'rgba(0, 0, 0, 0.6)',
+	orText: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		marginBottom: 20,
+	},
+	inputsContainer: {
+		alignItems: 'center',
+	},
+	input: {
+		textAlign: 'center',
+		marginVertical: 10,
+		backgroundColor: 'rgba(200,0,0,0.1)',
+		borderRadius: 10,
+		padding: 5,
+		fontSize: 22,
+		color: 'rgba(0,0,0,0.7)',
+	},
+	passwordInputContainer: {
+		flexDirection: 'row-reverse',
+		alignItems: 'center',
+	},
+	showPassIcon: {
+		position: 'absolute',
+		right: 5,
 	},
 });

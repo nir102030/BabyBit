@@ -1,13 +1,9 @@
 import React from 'react';
 import { TouchableOpacity, Image, Text, StyleSheet, Dimensions } from 'react-native';
 import * as Google from 'expo-google-app-auth';
+import { googleConfig } from './config';
 
 const GoogleSignUp = ({ handleSignup, navigation }) => {
-	const googleConfig = {
-		androidClientId: '525239721755-n2t92e65qolbetvqc0sngt8occn5p19i.apps.googleusercontent.com',
-		androidStandaloneAppClientId: '525239721755-nsddhp6fpshtemf6bfnn9fkd7v0mtopr.apps.googleusercontent.com',
-	};
-
 	const signUpWithGoogle = async () => {
 		const { type, user } = await Google.logInAsync(googleConfig);
 		if (type === 'success') {
@@ -17,7 +13,7 @@ const GoogleSignUp = ({ handleSignup, navigation }) => {
 
 	return (
 		<TouchableOpacity onPress={signUpWithGoogle} style={styles.container}>
-			<Image source={require('../assets/google-icon.png')} style={styles.img} />
+			<Image source={require('../../assets/google-icon.png')} style={styles.img} />
 			<Text style={styles.text}>הרשם עם גוגל</Text>
 		</TouchableOpacity>
 	);
@@ -42,7 +38,6 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
-		width: Dimensions.get('window').width * 0.7,
 	},
 	img: {
 		height: 35,

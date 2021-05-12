@@ -3,16 +3,28 @@ import { Dimensions } from 'react-native';
 import { View, Text, StyleSheet, Alert, Image, Switch } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
+import { Context as GroupContext } from '../context/GroupContext';
 import { styles as appStyles } from '../styles/styles';
+import BabyIcon from '../assets/BabyIcon';
 
 const ProfileScreen = () => {
 	const { state, signout, editUser } = useContext(AuthContext);
-	const toggleSwitch = () => editUser({ ...state.user, notificationsEnabled: !state.user.notificationsEnabled });
+	const groupContext = useContext(GroupContext);
+	const group = groupContext.state.group;
+	const { editGroup } = groupContext;
+	const toggleSwitch = () => {
+		const editedUser = { ...state.user, notificationsEnabled: !state.user.notificationsEnabled };
+		editUser(editedUser);
+		editGroup({
+			...group,
+			participants: group.participants.map((part) => (part.userName == state.user.userName ? editedUser : part)),
+		});
+	};
 
 	const signoutAlert = () => {
-		Alert.alert('היי', 'אתה בטוח שברצונך להתנתק?', [
+		Alert.alert('', 'את/ה בטוח שברצונך להתנתק?', [
 			{ text: 'ביטול', style: 'cancel' },
-			{ text: 'כן, התנתק מהפרופיל', onPress: () => signout() },
+			{ text: 'התנתק', onPress: () => signout() },
 		]);
 	};
 
@@ -34,7 +46,7 @@ const ProfileScreen = () => {
 				/>
 			</View>
 			<View style={styles.signout}>
-				<Button title="התנתק" onPress={() => signoutAlert()} buttonStyle={appStyles.button} />
+				<Button title="התנתק מהפרופיל" onPress={() => signoutAlert()} buttonStyle={appStyles.button} />
 			</View>
 		</View>
 	);
@@ -46,6 +58,15 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: 'center',
+	},
+	babyIcon: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		opacity: 0.2,
+		backgroundColor: 'rgba(200,0,0,0.1)',
 	},
 	imageContainer: {
 		alignItems: 'center',
@@ -75,6 +96,7 @@ const styles = StyleSheet.create({
 	},
 	notificationsSwitch: {},
 	signout: {
-		top: Dimensions.get('window').height * 0.35,
+		//top: Dimensions.get('window').height * 0.45,
+		marginTop: Dimensions.get('window').height * 0.1,
 	},
 });

@@ -10,6 +10,14 @@ const shiftReducer = (state, action) => {
 				shifts: [...state.shifts, action.payload.shift],
 				payments: { ...state.payments, totalPayment: state.payments.totalPayment + action.payload.payment },
 			};
+		case 'editShift':
+			return {
+				...state,
+				shifts: state.shifts.map((shift) =>
+					shift.id == action.payload.shift.id ? action.payload.shift : shift
+				),
+				payments: { ...state.payments, totalPayment: state.payments.totalPayment + action.payload.paymentDiff },
+			};
 		case 'removeShift':
 			return {
 				...state,
@@ -27,32 +35,34 @@ const shiftReducer = (state, action) => {
 			};
 		case 'getAllShifts':
 			return { ...state, shifts: action.payload.shifts, payments: action.payload.payments };
+		case 'unmarkShift':
+			return {
+				...state,
+				shifts: state.shifts.map((shift) => (shift.id == action.payload ? { ...shift, marked: false } : shift)),
+			};
+		case 'unmarkAllShifts':
+			return {
+				...state,
+				shifts: state.shifts.map((shift) => {
+					return { ...shift, marked: false };
+				}),
+			};
 		default:
 			return state;
 	}
 };
 
 //add a shift to the local state and to the db
-const addShift = (dispatch) => async (group, shifts, shift) => {
-	//calcuate the new shift id (accroding to the number of shifts in this group)
-	const shiftId =
-		shifts.length > 0
-			? Math.max.apply(
-					Math,
-					shifts.map((shift) => shift.id)
-			  ) + 1
-			: 1;
-
+const addShift = (dispatch) => async (group, shift) => {
 	//calcualte the total hours of the shift
 	const totalHours = (moment(shift.to).diff(moment(shift.from), 'minutes') / 60).toFixed(2);
 
 	//calcualte the payment needed for this shift
-	const payment = totalHours * group.hourlyPayment;
+	const payment = Math.round(totalHours * group.hourlyPayment);
 
 	//create the new shift object
 	const newShift = {
 		...shift,
-		id: shiftId,
 		totalHours: totalHours,
 		payment: payment,
 		paied: 0,
@@ -66,6 +76,31 @@ const addShift = (dispatch) => async (group, shifts, shift) => {
 	dispatch({
 		type: 'addShift',
 		payload: { shift: newShift, payment: payment },
+	});
+};
+
+const editShift = (dispatch) => async (shift, group) => {
+	//calcualte the total hours of the shift
+	const totalHours = (moment(shift.to).diff(moment(shift.from), 'minutes') / 60).toFixed(2);
+
+	//calcualte the payment needed for this shift
+	const payment = Math.round(totalHours * group.hourlyPayment);
+
+	// calculate the difference between the old payment for this shift to the new payment
+	const paymentDiff = payment - shift.payment;
+
+	//create the new shift object
+	const editedShift = {
+		...shift,
+		payment: payment,
+		totalHours: totalHours,
+	};
+
+	editShiftDb(editedShift);
+
+	dispatch({
+		type: 'editShift',
+		payload: { shift: editedShift, paymentDiff: paymentDiff },
 	});
 };
 
@@ -104,10 +139,15 @@ const setPaidShifts = (dispatch) => (shifts, paied) => {
 			//subtract the amount paied from the total payment amount
 			totalAmountToPay = totalAmountToPay - amountCanPay;
 
-			//edit the shift in db
-			editShiftDb({ ...shift, paied: shift.paied + amountCanPay });
+			const amountPaid = shift.paied + amountCanPay;
 
-			return { ...shift, paied: shift.paied + amountCanPay }; //return the updated shift
+			//edit the shift in db
+			editShiftDb({ ...shift, paied: amountPaid });
+
+			//mark the shifts that are fully paid
+			const marked = amountPaid == shift.payment ? true : false;
+
+			return { ...shift, paied: amountPaid, marked: marked }; //return the updated shift
 		} else return shift; //else return the original shift
 	});
 	const updatedShifts = [...shiftsAlreadyFullyPaied, ...paidShifts];
@@ -142,9 +182,22 @@ const getAllShifts = (dispatch) => async (groupId) => {
 	});
 };
 
+const unmarkShift = (dispatch) => (shiftId) => {
+	dispatch({
+		type: 'unmarkShift',
+		payload: shiftId,
+	});
+};
+
+const unmarkAllShifts = (dispatch) => () => {
+	dispatch({
+		type: 'unmarkAllShifts',
+	});
+};
+
 export const { Provider, Context } = createDataContext(
 	shiftReducer,
-	{ addShift, removeShift, setPaidShifts, getAllShifts },
+	{ addShift, editShift, removeShift, setPaidShifts, getAllShifts, unmarkShift, unmarkAllShifts },
 	{
 		shifts: [],
 		payments: { totalPayment: 0, totalPaied: 0 },

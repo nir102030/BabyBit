@@ -16,7 +16,6 @@ export const registerForPushNotificationsAsync = async () => {
 			return;
 		}
 		token = (await Notifications.getExpoPushTokenAsync()).data;
-		console.log(token);
 	} else {
 		alert('Must use physical device for Push Notifications');
 	}
@@ -55,7 +54,6 @@ const sendPushNotification = async (expoPushToken, title, body, data) => {
 
 const sendToUsers = (user, group, notificationTitle, notificationBody) => {
 	const expoPushTokens = group.participants.map((participant) => {
-		console.log(participant);
 		return participant.userName != user.userName && participant.notificationsEnabled
 			? participant.expoPushToken
 			: null;
@@ -75,10 +73,52 @@ export const sendPaymentNotification = (user, paid, group) => {
 	sendToUsers(user, group, notificationTitle, notificationBody);
 };
 
+export const sendEditedShiftDateNotification = (user, group, oldDate, newDate) => {
+	const notificationTitle = 'משמרת עודכנה';
+	const notificationBody = `${user.name} עדכן את תאריך המשמרת מ-${moment(oldDate).format('DD-MM-YYYY')} ל-${moment(
+		newDate
+	).format('DD-MM-YYYY')}`;
+	sendToUsers(user, group, notificationTitle, notificationBody);
+};
+
+export const sendEditedShiftTimeNotification = (user, group, date, oldTime, newTime) => {
+	const notificationTitle = 'משמרת עודכנה';
+	const notificationBody = `${user.name} עדכן את זמן המשמרת בתאריך ${moment(date).format(
+		'DD-MM-YYYY'
+	)} מ-${oldTime} ל-${newTime}`;
+	sendToUsers(user, group, notificationTitle, notificationBody);
+};
+
 export const sendShiftRemvoalNotification = (user, shift, group) => {
 	const notificationTitle = 'משמרת הוסרה';
 	const notificationBody = `${user.name} הסיר משמרת מתאריך ${moment(shift.date).format('DD-MM-YYYY')} בקבוצת ${
 		group.name
 	}`;
+	sendToUsers(user, group, notificationTitle, notificationBody);
+};
+
+export const sendGroupNameEditNotification = (user, group, oldGroupName) => {
+	const notificationTitle = 'שם הקבוצה שונה';
+	const notificationBody = `${user.name} שינה את שם הקבוצה מ - ${oldGroupName} ל - ${group.name}`;
+	sendToUsers(user, group, notificationTitle, notificationBody);
+};
+
+export const sendGroupRateEditNotification = (user, group, oldRate) => {
+	const notificationTitle = 'תעריף שעתי שונה';
+	const notificationBody = `${user.name} שינה את התעריף השעתי בקבוצת "${
+		group.name
+	}" מ${'\u20AA'}${oldRate} ל${'\u20AA'}${group.hourlyPayment} . השינוי יחול רק על משמרות חדשות.`;
+	sendToUsers(user, group, notificationTitle, notificationBody);
+};
+
+export const sendGroupExitedNotification = (user, group) => {
+	const notificationTitle = 'משתמש עזב את הקבוצה';
+	const notificationBody = `${user.name} עזב את קבוצת "${group.name}".`;
+	sendToUsers(user, group, notificationTitle, notificationBody);
+};
+
+export const sendGroupJoinedNotification = (user, group) => {
+	const notificationTitle = 'משתמש הצטרף לקבוצה';
+	const notificationBody = `${user.name} הצטרף לקבוצת "${group.name}"`;
 	sendToUsers(user, group, notificationTitle, notificationBody);
 };
