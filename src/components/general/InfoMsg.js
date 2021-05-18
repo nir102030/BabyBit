@@ -7,6 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const InfoMsg = ({ text, containerStyle, color }) => {
 	const [visible, setVisible] = useState(false);
+	console.log(visible);
 	return (
 		<View style={containerStyle}>
 			<TouchableOpacity onPress={() => setVisible(!visible)}>
