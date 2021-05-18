@@ -8,7 +8,7 @@ const ChangeGroupButton = ({ onPress }) => {
 		<Card containerStyle={styles.container}>
 			<TouchableOpacity onPress={onPress} style={styles.view}>
 				<MaterialCommunityIcons name="exit-to-app" size={26} color="rgb(200,50,50)" style={styles.icon} />
-				<Text style={styles.text}>החלף קבוצה</Text>
+				<Text style={styles.text}>החלפת קבוצה</Text>
 			</TouchableOpacity>
 		</Card>
 	);

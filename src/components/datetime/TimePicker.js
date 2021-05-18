@@ -27,7 +27,7 @@ const CustomDateTimePicker = ({ time, setTime, type, isInputRecieved, setIsInput
 				{isInputRecieved ? (
 					<Text style={styles.text}>{moment(time).format('HH:mm')}</Text>
 				) : (
-					<Text style={styles.placeholder}>{type == 'from' ? 'בחר שעת התחלה' : 'בחר שעת סיום'}</Text>
+					<Text style={styles.placeholder}>{type == 'from' ? 'שעת התחלה' : 'שעת סיום'}</Text>
 				)}
 			</TouchableOpacity>
 			{show && (

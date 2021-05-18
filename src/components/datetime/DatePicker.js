@@ -22,7 +22,7 @@ const DatePicker = ({ date, setDate, isInputRecieved, setIsInputRecieved }) => {
 				{isInputRecieved ? (
 					<Text style={styles.text}>{moment(date).format('DD-MM-YYYY')}</Text>
 				) : (
-					<Text style={styles.placeholder}>בחר תאריך המשמרת</Text>
+					<Text style={styles.placeholder}>תאריך המשמרת</Text>
 				)}
 			</TouchableOpacity>
 			{show && (

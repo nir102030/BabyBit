@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Dimensions } from 'react-native';
-import BabyIcon from '../assets/BabyIcon';
+import BabyIcon from '../../assets/BabyIcon';
 
 const Loader = () => {
 	return (

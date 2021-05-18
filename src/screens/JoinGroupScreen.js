@@ -1,85 +1,32 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { ScrollView, Modal, Alert, View, StyleSheet, Text, TextInput } from 'react-native';
-import {} from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { ScrollView, View, StyleSheet, Text, TextInput } from 'react-native';
 import { Button } from 'react-native-elements';
-import { Context as AuthContext } from '../context/AuthContext';
-import { Context as GroupContext } from '../context/GroupContext';
 import { styles as appStyles } from '../styles/styles';
 import { registerForPushNotificationsAsync } from '../api/notificationsApi';
 import BabyIcon from '../assets/BabyIcon';
-import { sendGroupJoinedNotification } from '../api/notificationsApi';
-import Emoji from 'react-native-emoji';
+import WelcomeMsg from '../components/general/WelcomeMsg';
+import useGroupSubmission from '../hooks/useGroupSubmission';
+import { Context as AuthContext } from '../context/AuthContext';
+import InfoMsg from '../components/general/InfoMsg';
 
 const JoinGroupScreen = () => {
-	const { state, editUser } = useContext(AuthContext);
-	const groupContext = useContext(GroupContext);
-	const { addGroup, getGroup, editGroup } = groupContext;
-	const user = state.user;
+	const [welcomeMsgVisible, setWelcomeMsgVisible] = useState(false);
 	const [groupStatus, setGroupStatus] = useState();
 	const [group, setGroup] = useState({ id: '', name: '', hourlyPayment: '', participants: [] });
+	const [handleNewGroupSubmit, handleOldGroupSubmit] = useGroupSubmission(group);
+	const { state, editUser } = useContext(AuthContext);
 
-	const generateGroupId = () => {
-		return (id = Math.round(Math.random() * 9999999999));
-	};
-
-	// handles a new group subbmission
-	const handleNewGroupSubmit = () => {
-		if (!group.name) {
-			Alert.alert('', 'חובה להזין את שם הקבוצה', [{ text: 'הבנתי' }]);
-		} else if (!group.hourlyPayment) {
-			Alert.alert('', 'חובה להזין תשלום שעתי', [{ text: 'הבנתי' }]);
-		} else {
-			let isnum = /^\d+$/.test(group.hourlyPayment);
-			if (isnum) {
-				const groupId = generateGroupId();
-				const editedUser = {
-					...user,
-					groupId: groupId,
-				};
-				addGroup({ ...group, id: groupId, participants: [editedUser], totalPayment: 0 });
-				editUser(editedUser);
-			} else Alert.alert('', 'התשלום השעתי חייב להכיל ספרות בלבד', [{ text: 'הבנתי' }]);
-		}
-	};
-
-	// handles joining to an existing group
-	const handleOldGroupSubmit = async () => {
-		if (!group.id) {
-			Alert.alert('', 'חובה להזין את קוד הקבוצה', [{ text: 'הבנתי' }]);
-		} else {
-			const dbGroup = await getGroup(group.id);
-			if (!dbGroup) {
-				Alert.alert('', 'קוד הקבוצה שגוי! נסה קוד אחר', [{ text: 'הבנתי' }]);
-			} else {
-				const editedUser = {
-					...user,
-					groupId: group.id,
-				};
-				sendGroupJoinedNotification(state.user, dbGroup);
-				editGroup({ ...dbGroup, participants: [...dbGroup.participants, editedUser] });
-				editUser(editedUser);
-			}
-		}
-	};
-
+	// get the notifications push token from expo
 	const initiateNotificationsService = async () => {
 		const expoPushToken = await registerForPushNotificationsAsync();
 		editUser({ ...state.user, expoPushToken: expoPushToken });
 	};
 
-	const [isModalVisible, setIsModalVisible] = useState(false);
-
-	const showWelcomeMsg = () => {
-		setIsModalVisible(true);
-	};
-
-	// on user's first enter the app (before he have the notifications token)
-	// initiate notifications service and showup a modal with an welcome message
+	// for new users, initiate notifications service and show a welcome message
 	useEffect(() => {
-		if (!state.user.expoPushToken) {
+		if (state.user.new) {
 			initiateNotificationsService();
-			showWelcomeMsg();
-			setTimeout(() => setIsModalVisible(false), 5000);
+			setWelcomeMsgVisible(true);
 		}
 	}, []);
 
@@ -90,80 +37,93 @@ const JoinGroupScreen = () => {
 	return (
 		<View style={styles.container}>
 			<BabyIcon style={styles.babyIcon} />
-			{isModalVisible ? (
-				<View style={styles.centeredView}>
-					<Modal visible={isModalVisible} transparent={true}>
-						<View style={styles.centeredView}>
-							<View style={styles.modalView}>
-								<View style={styles.welcomTextContainer}>
-									<Text style={styles.welcomeText}>ברוכים הבאים לבייבי-ביט!</Text>
-									<Emoji name="grinning" style={{ fontSize: 40 }} />
-								</View>
-								<View style={styles.welcomTextContainer}>
-									<Text style={styles.welcomInfoText}>
-										אפליקציה לניהול המשמרות והתשלומים של הבייביסיטר שלכם
-									</Text>
-									<Emoji name="baby" style={{ fontSize: 40 }} />
-								</View>
-							</View>
-						</View>
-					</Modal>
-				</View>
+			{welcomeMsgVisible ? (
+				<WelcomeMsg welcomeMsgVisible={welcomeMsgVisible} setWelcomeMsgVisible={setWelcomeMsgVisible} />
 			) : (
 				<ScrollView contentContainerStyle={styles.scrollView}>
 					<Text style={styles.intro2}>כדי להתחיל, בחר\י אחת משתי האופציות הבאות:</Text>
 					<View style={styles.buttonsContainer}>
 						<Button
-							title="צור קבוצה חדשה"
+							title="יצירת קבוצה חדשה"
 							onPress={() => setGroupStatus('new')}
 							buttonStyle={[
 								appStyles.button,
 								styles.button,
 								groupStatus == 'new' ? styles.pressedButton : null,
 							]}
+							icon={() => (
+								<InfoMsg
+									text="צרו קבוצה עם הבייביסטר וההורים, שבה כולכם תוכלו לצפות ולתעד משמרות ותשלומים"
+									containerStyle={{ marginLeft: 5 }}
+									color={'rgba(255,255,255,0.7)'}
+								/>
+							)}
 						/>
 						<Button
-							title="הצטרף לקבוצה קיימת"
+							title="הצטרפות לקבוצה קיימת"
 							onPress={() => setGroupStatus('old')}
 							buttonStyle={[
 								appStyles.button,
 								styles.button,
 								groupStatus == 'old' ? styles.pressedButton : null,
 							]}
+							icon={() => (
+								<InfoMsg
+									text="בחרו באופציה זו אם קיבלתם זימון להצטרף לקבוצה ויש בידכם את קוד הקבוצה"
+									containerStyle={{ marginLeft: 5 }}
+									color={'rgba(255,255,255,0.7)'}
+								/>
+							)}
 						/>
 					</View>
 					{groupStatus === 'new' ? (
 						<View style={styles.newGroupContainer}>
-							<View style={styles.nameInputContainer}>
+							<View style={styles.inputContainer}>
 								<TextInput
-									placeholder="בחר שם לקבוצה"
+									placeholder="שם הקבוצה"
 									value={group.name}
 									onChangeText={handleNameInputChange}
 									style={[appStyles.input, styles.input]}
 								/>
 								<Text style={styles.groupNameLength}>{25 - group.name.length}</Text>
 							</View>
+							<View style={styles.inputContainer}>
+								<InfoMsg
+									text={`תשלום עבור שעת עבודה של הבייביסיטר\n${
+										state.user.type == 'parent' ? '(תוכלו לשנות זאת בהמשך)' : ''
+									}`}
+									containerStyle={{ position: 'absolute', right: 5, zIndex: 1 }}
+									color={'rgba(100,0,0,0.3)'}
+								/>
+								<TextInput
+									placeholder="תשלום שעתי"
+									value={group.hourlyPayment}
+									onChangeText={(input) => setGroup({ ...group, hourlyPayment: input })}
+									style={[appStyles.input, styles.input]}
+									keyboardType="numeric"
+								/>
+							</View>
+						</View>
+					) : groupStatus == 'old' ? (
+						<View style={styles.inputContainer}>
+							<InfoMsg
+								text='הקוד שנשלח אליך ע"י חבר בקבוצה'
+								containerStyle={{ position: 'absolute', right: 5, zIndex: 1 }}
+								color={'rgba(100,0,0,0.3)'}
+							/>
 							<TextInput
-								placeholder="הזן תשלום שעתי"
-								value={group.hourlyPayment}
-								onChangeText={(input) => setGroup({ ...group, hourlyPayment: input })}
+								placeholder="קוד הקבוצה"
+								value={group.id}
+								onChangeText={(input) => setGroup({ ...group, id: input })}
 								style={[appStyles.input, styles.input]}
 								keyboardType="numeric"
 							/>
 						</View>
-					) : groupStatus == 'old' ? (
-						<TextInput
-							placeholder="הכנס את קוד הקבוצה"
-							value={group.id}
-							onChangeText={(input) => setGroup({ ...group, id: input })}
-							style={[appStyles.input, styles.input]}
-							keyboardType="numeric"
-						/>
 					) : null}
 					{(groupStatus == 'new' && group.name && group.hourlyPayment) ||
 					(groupStatus == 'old' && group.id) ? (
 						<Button
-							title="המשך"
+							title={groupStatus == 'new' ? 'צור קבוצה' : 'הצטרף'}
 							onPress={() => (groupStatus === 'new' ? handleNewGroupSubmit() : handleOldGroupSubmit())}
 							containerStyle={styles.continueButtonContainer}
 							buttonStyle={appStyles.button}
@@ -193,43 +153,6 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		backgroundColor: 'rgba(200,0,0,0.1)',
 	},
-	centeredView: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	modalView: {
-		margin: 20,
-		backgroundColor: 'white',
-		borderRadius: 20,
-		padding: 35,
-		alignItems: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 5,
-	},
-	welcomTextContainer: {
-		flexDirection: 'row-reverse',
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	welcomeText: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		marginLeft: 10,
-		textAlign: 'center',
-	},
-	welcomInfoText: {
-		fontSize: 24,
-		textAlign: 'center',
-		marginTop: 20,
-		marginLeft: 10,
-	},
 	intro2: {
 		fontSize: 24,
 		marginTop: 40,
@@ -243,6 +166,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		width: null,
+		flexDirection: 'row-reverse',
 	},
 	pressedButton: {
 		backgroundColor: 'rgba(200,50,50,0.8)',
@@ -257,19 +181,19 @@ const styles = StyleSheet.create({
 		fontSize: 22,
 		color: 'rgba(0,0,0,0.7)',
 	},
-	newGroupContainer: {
-		//width: Dimensions.get('window').width * 0.7,
-	},
-	nameInputContainer: {
-		flexDirection: 'row-reverse',
+	newGroupContainer: {},
+	inputContainer: {
+		flexDirection: 'row',
 		alignItems: 'center',
+		zIndex: 0,
+		justifyContent: 'center',
 	},
 	groupNameLength: {
 		position: 'absolute',
-		right: 5,
+		left: 5,
 		color: 'rgba(0,0,0,0.3)',
 	},
 	continueButtonContainer: {
-		margin: 30,
+		margin: 20,
 	},
 });

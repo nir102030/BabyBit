@@ -1,13 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { Dimensions } from 'react-native';
-import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
-import { Button, Input } from 'react-native-elements';
+import { View, StyleSheet, Text, TouchableOpacity, Alert, TextInput, Linking } from 'react-native';
+import { Button } from 'react-native-elements';
 import GoogleSignIn from '../components/google/GoogleSignIn';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
 import { styles as appStyles } from '../styles/styles';
 import { Entypo } from '@expo/vector-icons';
-import Loader from '../components/Loader';
+import Loader from '../components/general/Loader';
 import BabyIcon from '../assets/BabyIcon';
 import { ScrollView } from 'react-native-gesture-handler';
 
@@ -79,6 +79,15 @@ const LoginScreen = ({ navigation }) => {
 					}}
 					buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.35 }]}
 				/>
+				<TouchableOpacity
+					onPress={() =>
+						Linking.openURL(
+							`mailto:nir102030@gmail.com?subject=פניה חדשה בנוגע לתהליך הכניסה לאפליקציה &body=הוספ/י את תוכן הפניה...`
+						)
+					}
+				>
+					<Text style={styles.problemText}>נתקלת בבעיה? צור קשר ונעזור לך</Text>
+				</TouchableOpacity>
 			</ScrollView>
 		</View>
 	);
@@ -126,5 +135,9 @@ const styles = StyleSheet.create({
 	showPassIcon: {
 		position: 'absolute',
 		right: 5,
+	},
+	problemText: {
+		marginTop: 10,
+		fontSize: 16,
 	},
 });

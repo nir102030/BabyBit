@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { Context as GroupContext } from '../context/GroupContext';
 import { Context as AuthContext } from '../context/AuthContext';
@@ -18,6 +18,10 @@ const useGroupDetail = (key, validation, notification) => {
 	const onChange = (value) => {
 		setDetail({ ...detail, value: value });
 	};
+
+	useEffect(() => {
+		setDetail({ ...detail, value: state.group[key] });
+	}, [group]);
 
 	const handleEdit = () => {
 		if (!detail.value) {

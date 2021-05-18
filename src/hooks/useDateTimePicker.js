@@ -24,22 +24,34 @@ const useDateTimePicker = (shift, editShift) => {
 
 	// handles date picker press
 	const onDatePickerPress = () => {
-		setPicker({
-			show: true,
-			mode: 'date',
-			value: new Date(shift.date),
-			onChange: onDateChange,
-		});
+		if (shift.paied > 0) {
+			Alert.alert('', 'לא ניתן לשנות את תאריך המשמרת לאחר שהיא שולמה בחלקה', [{ text: 'הבנתי' }]);
+			setPicker({
+				show: false,
+			});
+		} else
+			setPicker({
+				show: true,
+				mode: 'date',
+				value: new Date(shift.date),
+				onChange: onDateChange,
+			});
 	};
 
 	// handles time picker press
 	const onTimePickerPress = () => {
-		setPicker({
-			show: true,
-			mode: 'time',
-			value: new Date(shift.from),
-			onChange: onFromTimeChange,
-		});
+		if (shift.paied > 0) {
+			Alert.alert('', 'לא ניתן לשנות את שעות המשמרת לאחר שהיא שולמה בחלקה', [{ text: 'הבנתי' }]);
+			setPicker({
+				show: false,
+			});
+		} else
+			setPicker({
+				show: true,
+				mode: 'time',
+				value: new Date(shift.from),
+				onChange: onFromTimeChange,
+			});
 	};
 
 	// handles date change
@@ -65,7 +77,7 @@ const useDateTimePicker = (shift, editShift) => {
 
 		// if the shift end hour is after the start hour, show alert
 		if (moment(chosenToTime).diff(moment(chosenFromTime), 'minutes') <= 0) {
-			Alert.alert('', 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה', [{ text: 'הבנתי, תודה' }]);
+			Alert.alert('', 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה', [{ text: 'הבנתי' }]);
 		} else {
 			const oldShiftTimeString = `${moment(shift.from).format('HH:mm')}-${moment(shift.to).format('HH:mm')}`;
 			const newShiftTimeString = `${moment(chosenFromTime).format('HH:MM')}-${moment(chosenToTime).format(

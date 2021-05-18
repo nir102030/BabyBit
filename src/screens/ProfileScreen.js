@@ -1,11 +1,11 @@
+import { Link } from '@react-navigation/native';
 import React, { useContext, useState } from 'react';
 import { Dimensions } from 'react-native';
-import { View, Text, StyleSheet, Alert, Image, Switch } from 'react-native';
+import { View, Text, StyleSheet, Alert, Image, Switch, Linking, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
 import { styles as appStyles } from '../styles/styles';
-import BabyIcon from '../assets/BabyIcon';
 
 const ProfileScreen = () => {
 	const { state, signout, editUser } = useContext(AuthContext);
@@ -17,14 +17,16 @@ const ProfileScreen = () => {
 		editUser(editedUser);
 		editGroup({
 			...group,
-			participants: group.participants.map((part) => (part.userName == state.user.userName ? editedUser : part)),
+			participants: group.participants.map((participant) =>
+				participant.userName == state.user.userName ? editedUser : participant
+			),
 		});
 	};
 
 	const signoutAlert = () => {
-		Alert.alert('', 'את/ה בטוח שברצונך להתנתק?', [
+		Alert.alert('', 'את/ה בטוח/ה שברצונך להתנתק?', [
 			{ text: 'ביטול', style: 'cancel' },
-			{ text: 'התנתק', onPress: () => signout() },
+			{ text: 'התנתק/י', onPress: () => signout() },
 		]);
 	};
 
@@ -35,7 +37,7 @@ const ProfileScreen = () => {
 				<Text style={styles.name}>{state.user.name}</Text>
 			</View>
 			<View style={styles.notifications}>
-				<Text style={styles.notificationText}>הפעל התראות</Text>
+				<Text style={styles.notificationText}>הפעלת התראות</Text>
 				<Switch
 					trackColor={{ false: '#767577', true: '#81b0ff' }}
 					thumbColor={state.user.notificationsEnabled ? '#f5dd4b' : '#f4f3f4'}
@@ -46,8 +48,17 @@ const ProfileScreen = () => {
 				/>
 			</View>
 			<View style={styles.signout}>
-				<Button title="התנתק מהפרופיל" onPress={() => signoutAlert()} buttonStyle={appStyles.button} />
+				<Button title="התנתקות מהפרופיל" onPress={() => signoutAlert()} buttonStyle={appStyles.button} />
 			</View>
+			<TouchableOpacity
+				onPress={() =>
+					Linking.openURL(
+						`mailto:nir102030@gmail.com?subject=פניה חדשה עבור משתמש: ${state.user.userName}&body=הוספ/י את תוכן הפניה...`
+					)
+				}
+			>
+				<Text style={styles.problemText}>נתקלת בבעיה? צור קשר ונעזור לך</Text>
+			</TouchableOpacity>
 		</View>
 	);
 };
@@ -98,5 +109,9 @@ const styles = StyleSheet.create({
 	signout: {
 		//top: Dimensions.get('window').height * 0.45,
 		marginTop: Dimensions.get('window').height * 0.1,
+	},
+	problemText: {
+		marginTop: 15,
+		fontSize: 16,
 	},
 });

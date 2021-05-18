@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import {
 	View,
 	StyleSheet,
@@ -9,21 +9,22 @@ import {
 	Alert,
 	TextInput,
 	ScrollView,
+	Linking,
 } from 'react-native';
 import { Button } from 'react-native-elements';
-import { Picker } from '@react-native-picker/picker';
 import { Context as AuthContext } from '../context/AuthContext';
 import { styles as appStyles } from '../styles/styles';
-import ImagePicker from '../components/ImagePicker';
 import alternateProfilePic from '../assets/alternateProfilePic.webp';
 import GoogleSignUp from '../components/google/GoogleSignUp';
 import { Entypo } from '@expo/vector-icons';
-import Loader from '../components/Loader';
+import Loader from '../components/general/Loader';
 import BabyIcon from '../assets/BabyIcon';
+import ChooseUserTypeModal from '../components/general/ChooseUserTypeModal';
 
 const SignupScreen = ({ navigation }) => {
 	const { state, signup, clearError, setLoading } = useContext(AuthContext);
 	const [showPass, setShowPass] = useState(false);
+	const [userTypeModalVisible, setUserTypeModalVisible] = useState(true);
 	const [user, setUser] = useState({
 		userName: '',
 		password: '',
@@ -33,6 +34,7 @@ const SignupScreen = ({ navigation }) => {
 		groupId: null,
 		expoPushToken: null,
 		notificationsEnabled: true,
+		new: true,
 	});
 
 	const handleSignup = async () => {
@@ -64,54 +66,66 @@ const SignupScreen = ({ navigation }) => {
 	) : (
 		<View style={styles.container}>
 			<BabyIcon style={styles.babyIcon} />
-			<ScrollView contentContainerStyle={styles.scrollView}>
-				{state.err ? handleError() : null}
-				<View style={styles.pickerContainer}>
-					<Text style={styles.text}>בחר סוג משתמש</Text>
-					<Picker selectedValue={user.type} onValueChange={(value) => handleUserEdit('type', value)}>
-						<Picker.Item label="הורה" value="parent" color="rgba(0, 0, 0, 0.6)" />
-						<Picker.Item label="מטפל/ת" value="caregiver" color="rgba(0, 0, 0, 0.6)" />
-					</Picker>
-				</View>
-				<GoogleSignUp handleSignup={handleGoogleSignup} navigation={navigation} />
-				<Text style={styles.orText}>או</Text>
-				<View style={styles.inputsContainer}>
-					<TextInput
-						placeholder="בחר שם משתמש"
-						value={user.userName}
-						onChangeText={(value) => handleUserEdit('userName', value)}
-						style={[appStyles.input, styles.input]}
-					/>
-					<View style={styles.passwordInputContainer}>
+			{userTypeModalVisible ? (
+				<ChooseUserTypeModal
+					visible={userTypeModalVisible}
+					setVisible={setUserTypeModalVisible}
+					userType={user.type}
+					setUserType={(value) => handleUserEdit('type', value)}
+				/>
+			) : (
+				<ScrollView contentContainerStyle={styles.scrollView}>
+					{state.err ? handleError() : null}
+
+					<GoogleSignUp handleSignup={handleGoogleSignup} navigation={navigation} />
+					<Text style={styles.orText}>או</Text>
+					<View style={styles.inputsContainer}>
 						<TextInput
-							placeholder="בחר סיסמא"
-							value={user.password}
-							onChangeText={(value) => handleUserEdit('password', value)}
-							secureTextEntry={!showPass}
+							placeholder="בחר שם משתמש"
+							value={user.userName}
+							onChangeText={(value) => handleUserEdit('userName', value)}
 							style={[appStyles.input, styles.input]}
 						/>
-						<TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showPassIcon}>
-							<Entypo name={showPass ? 'eye-with-line' : 'eye'} size={24} color="black" />
-						</TouchableOpacity>
+						<View style={styles.passwordInputContainer}>
+							<TextInput
+								placeholder="בחר סיסמא"
+								value={user.password}
+								onChangeText={(value) => handleUserEdit('password', value)}
+								secureTextEntry={!showPass}
+								style={[appStyles.input, styles.input]}
+							/>
+							<TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showPassIcon}>
+								<Entypo name={showPass ? 'eye-with-line' : 'eye'} size={24} color="black" />
+							</TouchableOpacity>
+						</View>
+						<TextInput
+							placeholder="מה שמך?"
+							value={user.name}
+							onChangeText={(value) => handleUserEdit('name', value)}
+							style={[appStyles.input, styles.input]}
+						/>
 					</View>
-					<TextInput
-						placeholder="מה שמך?"
-						value={user.name}
-						onChangeText={(value) => handleUserEdit('name', value)}
-						style={[appStyles.input, styles.input]}
+					<Button
+						title="הרשם"
+						onPress={() => handleSignup()}
+						buttonStyle={[appStyles.button, { marginTop: 10 }]}
 					/>
-				</View>
-				<Button
-					title="הרשם"
-					onPress={() => handleSignup()}
-					buttonStyle={[appStyles.button, { marginTop: 10 }]}
-				/>
-				<Button
-					title="כבר רשום? כנס לחשבון"
-					onPress={() => navigation.navigate('Login')}
-					buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.15 }]}
-				/>
-			</ScrollView>
+					<Button
+						title="כבר רשום? כנס לחשבון"
+						onPress={() => navigation.navigate('Login')}
+						buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.15 }]}
+					/>
+					<TouchableOpacity
+						onPress={() =>
+							Linking.openURL(
+								`mailto:nir102030@gmail.com?subject=פניה חדשה בנוגע לתהליך הרישום לאפליקציה &body=הוספ/י את תוכן הפניה...`
+							)
+						}
+					>
+						<Text style={styles.problemText}>נתקלת בבעיה? צור קשר ונעזור לך</Text>
+					</TouchableOpacity>
+				</ScrollView>
+			)}
 		</View>
 	);
 };
@@ -172,5 +186,9 @@ const styles = StyleSheet.create({
 	showPassIcon: {
 		position: 'absolute',
 		right: 5,
+	},
+	problemText: {
+		marginTop: 15,
+		fontSize: 16,
 	},
 });

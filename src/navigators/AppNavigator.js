@@ -7,7 +7,7 @@ import { joinGroupStack } from './joinGroupStack';
 import { Context as AuthContext } from '../context/AuthContext';
 import { Context as GroupContext } from '../context/GroupContext';
 import * as Notifications from 'expo-notifications';
-import Loader from '../components/Loader';
+import Loader from '../components/general/Loader';
 
 const AppNavigator = () => {
 	//auth state and actions
@@ -46,16 +46,28 @@ const AppNavigator = () => {
 		initiateParams();
 	}, []);
 
+	const updateGroup = async (user) => {
+		if (user) {
+			await getGroup(user.groupId);
+		} else {
+			console.log('update was not occoured');
+		}
+	};
+
 	//initiate notifications listeners
 	useEffect(() => {
+		const user = state.user;
 		// This listener is fired whenever a notification is received while the app is foregrounded
-		notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {});
+		notificationListener.current = Notifications.addNotificationReceivedListener(() => updateGroup(user));
 
-		//remove listeners on unmount
+		responseListener.current = Notifications.addNotificationResponseReceivedListener(() => updateGroup(user));
+
+		// Remove listeners on unmount
 		return () => {
 			Notifications.removeNotificationSubscription(notificationListener.current);
+			Notifications.removeNotificationSubscription(responseListener.current);
 		};
-	}, []);
+	}, [state]);
 
 	const Stack = createStackNavigator();
 

@@ -38,7 +38,7 @@ const sendPushNotification = async (expoPushToken, title, body, data) => {
 		sound: 'default',
 		title: title,
 		body: body,
-		data: {},
+		data: { data },
 	};
 
 	await fetch('https://exp.host/--/api/v2/push/send', {
@@ -58,7 +58,7 @@ const sendToUsers = (user, group, notificationTitle, notificationBody) => {
 			? participant.expoPushToken
 			: null;
 	});
-	expoPushTokens.forEach((token) => sendPushNotification(token, notificationTitle, notificationBody, {}));
+	expoPushTokens.forEach((token) => sendPushNotification(token, notificationTitle, notificationBody));
 };
 
 export const sendNewShiftNotification = (user, group) => {

@@ -1,126 +1,30 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import ShiftList from '../components/shifts/ShiftList';
-import moment from 'moment';
 import { Context as AuthContext } from '../context/AuthContext';
-import { Context as ShiftsContext } from '../context/ShiftContext';
+import { Context as ShiftContext } from '../context/ShiftContext';
 import { Context as GroupContext } from '../context/GroupContext';
-import {
-	sendNewShiftNotification,
-	sendPaymentNotification,
-	sendShiftRemvoalNotification,
-} from '../api/notificationsApi';
 import NewShift from '../components/shifts/NewShift';
 import NewPaymentCard from '../components/payments/NewPaymentCard';
 import AddPaymentButton from '../components/payments/AddPaymentButton';
 import BabyIcon from '../assets/BabyIcon';
-import { Dimensions } from 'react-native';
+import UserGuide from '../components/general/UserGuide';
+import useShift from '../hooks/useShift';
+import usePayment from '../hooks/usePayment';
 
 const HomeScreen = () => {
 	const scrollViewRef = useRef();
-
-	// the user state
-	const { state } = useContext(AuthContext);
-
-	// the state of the shift and payment to be created
-	const [shift, setShift] = useState({ date: new Date(), from: new Date(), to: new Date(), payment: 0, paied: 0 });
-	const [payment, setPayment] = useState('');
-
-	// group state
-	const group = useContext(GroupContext).state.group;
-
-	// shifts and payments state and methods
-	const shiftsContext = useContext(ShiftsContext);
-	const shifts = shiftsContext.state.shifts;
-	const payments = shiftsContext.state.payments;
-	const { addShift, removeShift, setPaidShifts, getAllShifts, unmarkShift, unmarkAllShifts } = shiftsContext;
-
-	// validation for the payment input
-	const validatePayment = () => {
-		return payment > payments.totalPayment // the payment input is not larger then the total payment
-			? `התשלום חייב להיות קטן או שווה לסכום הכולל שנותר לשלם!`
-			: !/^\d+$/.test(payment) // the payment input contains only numbers
-			? 'נא הזן ספרות בלבד'
-			: null;
-	};
-
-	// validation for the shift (hours) input
-	const validateShift = () => {
-		const shiftHoursDiff = moment(shift.to).diff(moment(shift.from), 'minutes'); // the shift end hour is after the start hour
-		return shiftHoursDiff <= 0 ? 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה' : null;
-	};
-
-	// the alert pops up when trying to delete a shift
-	const removeShiftAlert = (shift) => {
-		Alert.alert(
-			'היי',
-			'האם אתה בטוח שברצונך להסיר משמרת זו?',
-			[
-				{ text: 'לא, בטל פעולה' },
-				{
-					text: 'כן, הסר משמרת',
-					onPress: () => {
-						removeShift(shifts, shift);
-						sendShiftRemvoalNotification(state.user, shift, group);
-					},
-				},
-			],
-			{ cancelable: true }
-		);
-	};
-
-	// unmark the shift 1 second after it was added and marked
-	const unmarkAddedShift = (shiftId) => {
-		setTimeout(() => unmarkShift(shiftId), 1);
-	};
-
-	// alert that pops up when a new shift is added
-	const addShiftAlert = (shiftId) => {
-		Alert.alert('', 'המשמרת נוספה לרשימת המשמרות הפתוחות', [
-			{ text: 'מצוין, תודה!', onPress: () => unmarkAddedShift(shiftId) },
-		]);
-	};
-
-	// alert the pops up when a new payment is added, with onPress handler
-	const addPaymentAlert = () => {
-		Alert.alert('', 'תודה! סטטוס התשלום עודכן', [
-			{
-				text: 'מצוין, תודה!',
-				onPress: () => {
-					setPaidShifts(shifts, parseInt(payment));
-					setTimeout(() => unmarkAllShifts(), 1000);
-				},
-			},
-		]);
-	};
-
-	// triggered when a new shift is added
-	const onNewShiftSubmit = () => {
-		// calcuate the new shift id (accroding to the number of shifts in this group)
-		const shiftId =
-			shifts.length > 0
-				? Math.max.apply(
-						Math,
-						shifts.map((shift) => shift.id)
-				  ) + 1
-				: 1;
-
-		// add the shift to the db and app state
-		addShift(group, { ...shift, id: shiftId, marked: true }, state.user.name);
-
-		// add alert to the user
-		addShiftAlert(shiftId);
-
-		// send notification to all the group participants
-		sendNewShiftNotification(state.user, group);
-	};
-
-	// triggered when a new payment is added
-	const onNewPaymentSubmit = () => {
-		addPaymentAlert();
-		sendPaymentNotification(state.user, parseInt(payment), group); // send notification to all the group participants
-		setPayment('');
-	};
+	const [userGuideVisible, setUserGuideVisible] = useState(false);
+	const [isScrolledToEnd, setIsScrolledToEnd] = useState(true);
+	const [isPaymentOpened, setIsPaymentOpened] = useState(false);
+	const authContext = useContext(AuthContext);
+	const { user } = authContext.state;
+	const { editUser } = authContext;
+	const { group } = useContext(GroupContext).state;
+	const { getAllShifts, state } = useContext(ShiftContext);
+	const { shifts, payments } = state;
+	const [shift, setShift, validateShift, handleShiftSubmission, handleShiftRemoval] = useShift(user);
+	const [payment, setPayment, validatePayment, handlePaymentSubmission] = usePayment(user);
 
 	const scrollToEnd = () => {
 		scrollViewRef.current.scrollToEnd({ animated: true });
@@ -142,32 +46,44 @@ const HomeScreen = () => {
 		getAllShifts(group.id);
 	}, [group]);
 
-	const [isScrolledToEnd, setIsScrolledToEnd] = useState(true);
-	const [isPaymentOpened, setIsPaymentOpened] = useState(false);
+	// show user guide for new users
+	useEffect(() => {
+		if (user.new) {
+			setUserGuideVisible(true);
+			editUser({ ...user, new: false });
+		}
+	}, []);
 
 	return (
 		<View style={styles.container}>
 			<BabyIcon style={styles.babyIcon} />
 			<ScrollView contentContainerStyle={styles.scrollView} ref={scrollViewRef}>
+				{userGuideVisible ? (
+					<UserGuide
+						userType={user.type}
+						userGuideVisible={userGuideVisible}
+						setUserGuideVisible={setUserGuideVisible}
+					/>
+				) : null}
 				<ShiftList
 					shifts={shifts.filter((shift) => shift.paied < shift.payment || shift.marked)}
-					removeShiftAlert={removeShiftAlert}
+					handleShiftRemoval={handleShiftRemoval}
 				/>
 				<NewShift
 					shift={shift}
 					setShift={setShift}
-					onSubmit={onNewShiftSubmit}
+					onSubmit={handleShiftSubmission}
 					validateShift={validateShift}
 					setIsScrolledToEnd={setIsScrolledToEnd}
 				/>
 			</ScrollView>
 			<View style={[styles.totalPaymentView, { flexDirection: isPaymentOpened ? 'column' : 'row' }]}>
-				{state.user.type == 'parent' ? (
+				{user.type == 'parent' ? (
 					isPaymentOpened ? (
 						<NewPaymentCard
 							payment={payment}
 							setPayment={setPayment}
-							onSubmit={onNewPaymentSubmit}
+							onSubmit={handlePaymentSubmission}
 							validatePayment={validatePayment}
 							totalPayment={payments.totalPayment}
 							setIsScrolledToEnd={setIsScrolledToEnd}

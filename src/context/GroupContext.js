@@ -50,7 +50,6 @@ const editGroup = (dispatch) => async (group) => {
 const getGroup = (dispatch) => async (groupId) => {
 	try {
 		const response = await api.get('/getGroup', { headers: { groupid: groupId } });
-		console.log(response.data[0] + ' group was received from server on ' + new Date());
 		dispatch({
 			type: 'addGroup',
 			payload: response.data[0],

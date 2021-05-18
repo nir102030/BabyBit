@@ -4,10 +4,10 @@ import Shift from './Shift';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { AntDesign } from '@expo/vector-icons';
 
-const ShiftList = ({ shifts, removeShiftAlert }) => {
+const ShiftList = ({ shifts, handleShiftRemoval }) => {
 	const renderRightActions = (shift) => {
 		return (
-			<TouchableOpacity style={styles.rightContent} onPress={() => removeShiftAlert(shift)}>
+			<TouchableOpacity style={styles.rightContent} onPress={() => handleShiftRemoval(shift)}>
 				<AntDesign name="delete" size={40} color="rgba(255,255,255,0.8)" />
 			</TouchableOpacity>
 		);

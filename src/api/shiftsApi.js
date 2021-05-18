@@ -10,7 +10,8 @@ export const addShiftDb = async (shift) => {
 };
 
 export const editShiftDb = async (shift) => {
-	await api.post('/editShift', shift);
+	const response = await api.post('/editShift', shift);
+	return response;
 };
 
 export const deleteShiftDb = async (id, groupId) => {

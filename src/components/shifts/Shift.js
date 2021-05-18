@@ -10,7 +10,7 @@ import useDateTimePicker from '../../hooks/useDateTimePicker';
 import { Context as ShiftContext } from '../../context/ShiftContext';
 
 const Shift = ({ shift }) => {
-	const { editShift, removeShift } = useContext(ShiftContext);
+	const { editShift } = useContext(ShiftContext);
 
 	const [picker, onDatePickerPress, onTimePickerPress, handlePickerChange] = useDateTimePicker(shift, editShift);
 

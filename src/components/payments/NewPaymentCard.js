@@ -17,7 +17,7 @@ const NewPayment = ({
 }) => {
 	const handleSubmit = () => {
 		const err = validatePayment();
-		if (err) Alert.alert('', err, [{ text: 'הבנתי, תודה' }]);
+		if (err) Alert.alert('', err, [{ text: 'הבנתי' }]);
 		else {
 			Alert.alert('עדכון סטטוס תשלום', `האם את/ה מאשר/ת שבוצע תשלום על סה"כ ${payment} ש"ח?`, [
 				{
