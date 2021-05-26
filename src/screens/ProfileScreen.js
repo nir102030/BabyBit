@@ -107,11 +107,12 @@ const styles = StyleSheet.create({
 	},
 	notificationsSwitch: {},
 	signout: {
-		//top: Dimensions.get('window').height * 0.45,
 		marginTop: Dimensions.get('window').height * 0.1,
 	},
 	problemText: {
 		marginTop: 15,
 		fontSize: 16,
+		textDecorationLine: 'underline',
+		color: 'rgba(0,0,0,0.5)',
 	},
 });

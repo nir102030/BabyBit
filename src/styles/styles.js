@@ -4,7 +4,8 @@ export const styles = StyleSheet.create({
 	button: {
 		backgroundColor: 'rgba(200,0,0,0.4)',
 		width: Dimensions.get('window').width * 0.7,
-		margin: 5,
+		marginHorizontal: 5,
+		marginVertical: 7.5,
 		borderRadius: 10,
 	},
 	input: {

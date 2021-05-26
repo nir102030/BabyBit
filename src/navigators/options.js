@@ -30,7 +30,7 @@ export const profileScreenOptions = () => {
 export const headerTitle = () => {
 	return (
 		<View style={styles.headerTitleView}>
-			<MaterialCommunityIcons name="baby-face" size={30} color="pink" />
+			<MaterialCommunityIcons name="baby-face" size={30} color="rgba(200,0,100,0.2)" />
 			<Text style={styles.titleText}>BabyBit</Text>
 		</View>
 	);

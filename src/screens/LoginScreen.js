@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import { Dimensions } from 'react-native';
 import { View, StyleSheet, Text, TouchableOpacity, Alert, TextInput, Linking } from 'react-native';
 import { Button } from 'react-native-elements';
 import GoogleSignIn from '../components/google/GoogleSignIn';
@@ -11,11 +10,12 @@ import Loader from '../components/general/Loader';
 import BabyIcon from '../assets/BabyIcon';
 import { ScrollView } from 'react-native-gesture-handler';
 
-const LoginScreen = ({ navigation }) => {
-	const { state, signin, clearError, setLoading } = useContext(AuthContext);
+const LoginScreen = () => {
+	const { state, signin, clearError } = useContext(AuthContext);
 	const [userName, setUserName] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPass, setShowPass] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const groupContext = useContext(GroupContext);
 	const { getGroup } = groupContext;
@@ -23,12 +23,14 @@ const LoginScreen = ({ navigation }) => {
 	const handleSignin = async () => {
 		setLoading(true);
 		const user = await signin(userName, password);
+		setLoading(false);
 		if (user) getGroup(user.groupId);
 	};
 
 	const handleGoogleSignin = async (userName, password) => {
 		setLoading(true);
 		const user = await signin(userName, password);
+		setLoading(false);
 		if (user) getGroup(user.groupId);
 	};
 
@@ -36,7 +38,7 @@ const LoginScreen = ({ navigation }) => {
 		Alert.alert('', state.err, [{ text: 'הבנתי', onPress: clearError() }]);
 	};
 
-	return state.loading ? (
+	return loading ? (
 		<Loader />
 	) : (
 		<View style={styles.container}>
@@ -71,20 +73,13 @@ const LoginScreen = ({ navigation }) => {
 						containerStyle={{ marginTop: 10 }}
 					/>
 				</View>
-				<Button
-					title="לא רשום עדיין? עבור להרשמה"
-					onPress={() => {
-						clearError();
-						navigation.navigate('Signup');
-					}}
-					buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.35 }]}
-				/>
 				<TouchableOpacity
 					onPress={() =>
 						Linking.openURL(
 							`mailto:nir102030@gmail.com?subject=פניה חדשה בנוגע לתהליך הכניסה לאפליקציה &body=הוספ/י את תוכן הפניה...`
 						)
 					}
+					style={styles.problemTextContainer}
 				>
 					<Text style={styles.problemText}>נתקלת בבעיה? צור קשר ונעזור לך</Text>
 				</TouchableOpacity>
@@ -101,6 +96,7 @@ const styles = StyleSheet.create({
 	},
 	scrollView: {
 		alignItems: 'center',
+		flex: 1,
 	},
 	babyIcon: {
 		position: 'absolute',
@@ -136,8 +132,12 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		right: 5,
 	},
+	problemTextContainer: {
+		marginTop: 30,
+	},
 	problemText: {
-		marginTop: 10,
 		fontSize: 16,
+		textDecorationLine: 'underline',
+		color: 'rgba(0,0,0,0.5)',
 	},
 });

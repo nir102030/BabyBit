@@ -14,7 +14,7 @@ const GoogleSignIn = ({ handleSignin }) => {
 	return (
 		<TouchableOpacity onPress={signIn} style={styles.container}>
 			<Image source={require('../../assets/google-icon.png')} style={styles.img} />
-			<Text style={styles.text}>כנס עם גוגל</Text>
+			<Text style={styles.text}>כניסה עם גוגל</Text>
 		</TouchableOpacity>
 	);
 };
@@ -25,9 +25,11 @@ const styles = StyleSheet.create({
 	container: {
 		flexDirection: 'row',
 		backgroundColor: 'white',
+		width: Dimensions.get('window').width * 0.7,
+		marginHorizontal: 5,
+		marginVertical: 20,
 		borderRadius: 10,
-		margin: 20,
-		padding: 10,
+		padding: 8,
 		alignItems: 'center',
 		justifyContent: 'center',
 		shadowColor: '#000',
@@ -37,16 +39,16 @@ const styles = StyleSheet.create({
 		},
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
-		elevation: 5,
+		elevation: 2,
 	},
 	img: {
-		height: 35,
-		width: 35,
-		borderRadius: 35,
-		marginRight: 20,
+		height: 25,
+		width: 25,
+		borderRadius: 25,
+		marginRight: 10,
 	},
 	text: {
-		fontSize: 22,
+		fontSize: 20 / Dimensions.get('window').fontScale,
 		fontWeight: 'bold',
 	},
 });

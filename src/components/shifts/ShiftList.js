@@ -18,7 +18,7 @@ const ShiftList = ({ shifts, handleShiftRemoval }) => {
 			return (
 				<Swipeable
 					key={shift.id}
-					renderRightActions={shift.paied < shift.payment ? () => renderRightActions(shift) : null}
+					renderRightActions={shift.paied == 0 ? () => renderRightActions(shift) : null}
 					overshootRight={false}
 				>
 					<Shift shift={shift} />

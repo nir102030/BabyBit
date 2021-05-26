@@ -15,7 +15,7 @@ const NewShift = ({ shift, setShift, onSubmit, validateShift, setIsScrolledToEnd
 			Alert.alert('', 'חובה למלא תאריך, שעת התחלה ושעת סיום למשמרת', [{ text: 'הבנתי, תודה' }]);
 		else {
 			const err = validateShift();
-			if (err) Alert.alert('', err, [{ text: 'הבנתי, תודה' }]);
+			if (err) Alert.alert('', err, [{ text: 'הבנתי' }]);
 			else {
 				setIsShiftOpened(false);
 				setIsInputRecieved({ date: false, from: false, to: false });

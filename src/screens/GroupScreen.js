@@ -17,10 +17,10 @@ const GroupScreen = () => {
 	const editGroup = groupContext.editGroup;
 
 	const handleChangeGroup = () => {
-		editUser({ ...state.user, groupId: null });
-		const filteredParticipants = group.participants.filter((part) => part.userName != state.user.userName);
 		sendGroupExitedNotification(state.user, group);
+		const filteredParticipants = group.participants.filter((part) => part.userName != state.user.userName);
 		editGroup({ ...group, participants: filteredParticipants });
+		editUser({ ...state.user, groupId: null });
 	};
 
 	const changeGroupAlert = () => {

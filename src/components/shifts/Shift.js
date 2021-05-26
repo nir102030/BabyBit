@@ -33,13 +33,21 @@ const Shift = ({ shift }) => {
 	const renderDateTime = () => {
 		return (
 			<View style={styles.dateTimeContainer}>
-				<TouchableOpacity style={styles.date} onPress={onDatePickerPress}>
+				<TouchableOpacity
+					style={styles.date}
+					onPress={onDatePickerPress}
+					disabled={shift.paied == shift.payment}
+				>
 					<Fontisto name="date" size={20} style={styles.dateTimeIcon} />
 					<Text style={styles.dateTimeText}>
 						יום {getDayOfWeekHeb(moment(shift.date).day())}, {moment(shift.date).format('DD-MM-YYYY')}
 					</Text>
 				</TouchableOpacity>
-				<TouchableOpacity style={styles.time} onPress={onTimePickerPress}>
+				<TouchableOpacity
+					style={styles.time}
+					onPress={onTimePickerPress}
+					disabled={shift.paied == shift.payment}
+				>
 					<Fontisto name="clock" size={20} style={styles.dateTimeIcon} />
 					<Text style={styles.dateTimeText}>
 						{moment(shift.from).format('HH:mm')} - {moment(shift.to).format('HH:mm')}

@@ -3,6 +3,7 @@ import { useState, useContext } from 'react';
 import { Alert } from 'react-native';
 import { Context as GroupContext } from '../context/GroupContext';
 import { Context as AuthContext } from '../context/AuthContext';
+import { Context as ShiftContext } from '../context/ShiftContext';
 import { sendEditedShiftDateNotification, sendEditedShiftTimeNotification } from '../api/notificationsApi';
 
 const useDateTimePicker = (shift, editShift) => {
@@ -11,6 +12,8 @@ const useDateTimePicker = (shift, editShift) => {
 	const group = state.group;
 
 	const user = useContext(AuthContext).state.user;
+
+	const shifts = useContext(ShiftContext).state.shifts;
 
 	// triggered after any picker is showed
 	const handlePickerChange = (event) => {
@@ -75,10 +78,14 @@ const useDateTimePicker = (shift, editShift) => {
 	const onToTimeChange = (chosenFromTime, chosenToTime) => {
 		setPicker({ show: false }); //hide picker
 
+		// const isShiftTimeOverlapping = checkOverlapping(chosenFromTime, chosenToTime);
+		const isShiftTimeOverlapping = false;
+
 		// if the shift end hour is after the start hour, show alert
-		if (moment(chosenToTime).diff(moment(chosenFromTime), 'minutes') <= 0) {
+		if (moment(chosenToTime).diff(moment(chosenFromTime), 'minutes') <= 0)
 			Alert.alert('', 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה', [{ text: 'הבנתי' }]);
-		} else {
+		else if (isShiftTimeOverlapping) Alert.alert('', 'קיימת כבר משמרת בטווח זמנים זה', [{ text: 'הבנתי' }]);
+		else {
 			const oldShiftTimeString = `${moment(shift.from).format('HH:mm')}-${moment(shift.to).format('HH:mm')}`;
 			const newShiftTimeString = `${moment(chosenFromTime).format('HH:MM')}-${moment(chosenToTime).format(
 				'HH:mm'
@@ -86,6 +93,19 @@ const useDateTimePicker = (shift, editShift) => {
 			sendEditedShiftTimeNotification(user, group, shift.date, oldShiftTimeString, newShiftTimeString);
 			editShift({ ...shift, from: chosenFromTime, to: chosenToTime }, group);
 		}
+	};
+
+	const checkOverlapping = (startTime, endTime) => {
+		let isOverlapping = false;
+		shifts.forEach((exsitingShift) => {
+			const manipulatedStartTime = moment(startTime).add(1, 'minutes');
+			const manipulatedEndTime = moment(endTime).subtract(1, 'minutes');
+			const shiftStartTimeOverlapped = manipulatedStartTime.isBetween(exsitingShift.from, exsitingShift.to);
+			const shiftEndTimeOverlapped = manipulatedEndTime.isBetween(exsitingShift.from, exsitingShift.to);
+			if (shiftStartTimeOverlapped || shiftEndTimeOverlapped) isOverlapping = true;
+		});
+
+		return isOverlapping;
 	};
 
 	return [picker, onDatePickerPress, onTimePickerPress, handlePickerChange];

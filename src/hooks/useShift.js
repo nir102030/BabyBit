@@ -14,7 +14,24 @@ const useShift = (user) => {
 	// validation for the shift (hours) input
 	const validateShift = () => {
 		const shiftHoursDiff = moment(shift.to).diff(moment(shift.from), 'minutes'); // the shift end hour is after the start hour
-		return shiftHoursDiff <= 0 ? 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה' : null;
+		// const shiftIsOverlapping = checkOverlapping();
+		const shiftIsOverlapping = false;
+		if (shiftHoursDiff <= 0) return 'שעת הסיום של המשמרת חייבת להיות לאחר שעת ההתחלה';
+		else if (shiftIsOverlapping) return 'קיימת כבר משמרת בטווח זמנים זה';
+		else return null;
+	};
+
+	const checkOverlapping = () => {
+		let isOverlapping = false;
+		shifts.forEach((exsitingShift) => {
+			const manipulatedStartTime = moment(shift.from).add(1, 'minutes');
+			const manipulatedEndTime = moment(shift.to).subtract(1, 'minutes');
+			const shiftStartTimeOverlapped = manipulatedStartTime.isBetween(exsitingShift.from, exsitingShift.to);
+			const shiftEndTimeOverlapped = manipulatedEndTime.isBetween(exsitingShift.from, exsitingShift.to);
+			if (shiftStartTimeOverlapped || shiftEndTimeOverlapped) isOverlapping = true;
+		});
+
+		return isOverlapping;
 	};
 
 	// the alert pops up when trying to delete a shift

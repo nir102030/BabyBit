@@ -1,59 +1,62 @@
 {
-  "expo": {
-    "name": "BabyBit",
-    "slug": "babybit",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "com.nirkatz.babybit",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
-      "config": {
-        "googleSignIn": {
-          "certificateHash": "C078EC10096DC3B16B77B1E0883663CA6E141448"
-        }
-      },
-      "googleServicesFile": "./google-services.json"
-    },
-    "web": {
-      "favicon": "./assets/icon.png"
-    },
-    "scheme": "babybit",
-    "description": "A simple app for managing the shifts and payment of the caregiver/babysitter",
-    "githubUrl": "https://github.com/nir102030/BabyBit",
-    "packagerOpts": {
-      "config": "metro.config.js",
-      "sourceExts": [
-        "expo.ts",
-        "expo.tsx",
-        "expo.js",
-        "expo.jsx",
-        "ts",
-        "tsx",
-        "js",
-        "jsx",
-        "json",
-        "wasm",
-        "svg"
-      ]
-    }
-  }
+	"expo": {
+		"name": "BabyBit",
+		"slug": "babybit",
+		"version": "2.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"privacy": "public",
+		"notification": {
+			"icon": "./assets/icon.png"
+		},
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"updates": {
+			"fallbackToCacheTimeout": 0
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true
+		},
+		"android": {
+			"package": "com.nirkatz.babybit",
+			"versionCode": 4,
+			"permissions": [],
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#ffffff"
+			},
+			"config": {
+				"googleSignIn": {
+					"certificateHash": "C078EC10096DC3B16B77B1E0883663CA6E141448"
+				}
+			},
+			"googleServicesFile": "./google-services.json"
+		},
+		"web": {
+			"favicon": "./assets/icon.png"
+		},
+		"scheme": "babybit",
+		"description": "A simple app for managing the shifts and payment of the caregiver/babysitter",
+		"githubUrl": "https://github.com/nir102030/BabyBit",
+		"packagerOpts": {
+			"config": "metro.config.js",
+			"sourceExts": [
+				"expo.ts",
+				"expo.tsx",
+				"expo.js",
+				"expo.jsx",
+				"ts",
+				"tsx",
+				"js",
+				"jsx",
+				"json",
+				"wasm",
+				"svg"
+			]
+		}
+	}
 }

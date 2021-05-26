@@ -22,9 +22,12 @@ import BabyIcon from '../assets/BabyIcon';
 import ChooseUserTypeModal from '../components/general/ChooseUserTypeModal';
 
 const SignupScreen = ({ navigation }) => {
-	const { state, signup, clearError, setLoading } = useContext(AuthContext);
+	const { state, signup, clearError } = useContext(AuthContext);
 	const [showPass, setShowPass] = useState(false);
+	const [passValidation, setPassValidation] = useState({ value: '', valid: true });
+	const [showPassValidation, setShowPassValidation] = useState(false);
 	const [userTypeModalVisible, setUserTypeModalVisible] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [user, setUser] = useState({
 		userName: '',
 		password: '',
@@ -40,7 +43,9 @@ const SignupScreen = ({ navigation }) => {
 	const handleSignup = async () => {
 		setLoading(true);
 		const token = await signup(user);
+		setLoading(false);
 		if (token) {
+			Alert.alert('', 'ההרשמה בוצעה בהצלחה!', [{ text: 'אוקי' }]);
 			navigation.navigate('Login');
 		}
 	};
@@ -48,7 +53,9 @@ const SignupScreen = ({ navigation }) => {
 	const handleGoogleSignup = async (userName, password, name, img) => {
 		setLoading(true);
 		const token = await signup({ ...user, userName: userName, password: password, name: name, image: img });
+		setLoading(false);
 		if (token) {
+			Alert.alert('', 'ההרשמה בוצעה בהצלחה!', [{ text: 'אוקי' }]);
 			navigation.navigate('Login');
 		}
 	};
@@ -59,9 +66,14 @@ const SignupScreen = ({ navigation }) => {
 
 	const handleUserEdit = (key, value) => {
 		setUser({ ...user, [key]: value });
+		if (key == 'password') setPassValidation({ ...passValidation, valid: passValidation.value == value });
 	};
 
-	return state.loading ? (
+	const handleRepeatedPasswordChange = (value) => {
+		setPassValidation({ value: value, valid: value == user.password });
+	};
+
+	return loading ? (
 		<Loader />
 	) : (
 		<View style={styles.container}>
@@ -76,7 +88,6 @@ const SignupScreen = ({ navigation }) => {
 			) : (
 				<ScrollView contentContainerStyle={styles.scrollView}>
 					{state.err ? handleError() : null}
-
 					<GoogleSignUp handleSignup={handleGoogleSignup} navigation={navigation} />
 					<Text style={styles.orText}>או</Text>
 					<View style={styles.inputsContainer}>
@@ -95,9 +106,31 @@ const SignupScreen = ({ navigation }) => {
 								style={[appStyles.input, styles.input]}
 							/>
 							<TouchableOpacity onPress={() => setShowPass(!showPass)} style={styles.showPassIcon}>
-								<Entypo name={showPass ? 'eye-with-line' : 'eye'} size={24} color="black" />
+								<Entypo name={showPass ? 'eye-with-line' : 'eye'} size={24} color="rgba(0,0,0,0.5)" />
 							</TouchableOpacity>
 						</View>
+						<View style={styles.passwordInputContainer}>
+							<TextInput
+								placeholder="הזן סיסמא שנית"
+								value={passValidation.value}
+								onChangeText={handleRepeatedPasswordChange}
+								secureTextEntry={!showPassValidation}
+								style={[appStyles.input, styles.input]}
+							/>
+							<TouchableOpacity
+								onPress={() => setShowPassValidation(!showPassValidation)}
+								style={styles.showPassIcon}
+							>
+								<Entypo
+									name={showPassValidation ? 'eye-with-line' : 'eye'}
+									size={24}
+									color="rgba(0,0,0,0.5)"
+								/>
+							</TouchableOpacity>
+						</View>
+						{!passValidation.valid && user.password && passValidation.value ? (
+							<Text style={styles.passValidationErr}>הסיסמא לא תואמת לסיסמא הראשונית שהזנת</Text>
+						) : null}
 						<TextInput
 							placeholder="מה שמך?"
 							value={user.name}
@@ -105,22 +138,20 @@ const SignupScreen = ({ navigation }) => {
 							style={[appStyles.input, styles.input]}
 						/>
 					</View>
-					<Button
-						title="הרשם"
-						onPress={() => handleSignup()}
-						buttonStyle={[appStyles.button, { marginTop: 10 }]}
-					/>
-					<Button
-						title="כבר רשום? כנס לחשבון"
-						onPress={() => navigation.navigate('Login')}
-						buttonStyle={[appStyles.button, { marginTop: Dimensions.get('window').height * 0.15 }]}
-					/>
+					{user.userName && user.password && user.name && passValidation.value && passValidation.valid ? (
+						<Button
+							title="הרשם"
+							onPress={() => handleSignup()}
+							buttonStyle={[appStyles.button, { marginTop: 10 }]}
+						/>
+					) : null}
 					<TouchableOpacity
 						onPress={() =>
 							Linking.openURL(
 								`mailto:nir102030@gmail.com?subject=פניה חדשה בנוגע לתהליך הרישום לאפליקציה &body=הוספ/י את תוכן הפניה...`
 							)
 						}
+						style={styles.problemTextContainer}
 					>
 						<Text style={styles.problemText}>נתקלת בבעיה? צור קשר ונעזור לך</Text>
 					</TouchableOpacity>
@@ -138,6 +169,7 @@ const styles = StyleSheet.create({
 	},
 	scrollView: {
 		alignItems: 'center',
+		flex: 1,
 	},
 	babyIcon: {
 		position: 'absolute',
@@ -187,8 +219,16 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		right: 5,
 	},
+	passValidationErr: {
+		color: 'rgba(200,0,0,0.7)',
+	},
+	problemTextContainer: {
+		marginTop: 20,
+	},
 	problemText: {
 		marginTop: 15,
 		fontSize: 16,
+		textDecorationLine: 'underline',
+		color: 'rgba(0,0,0,0.5)',
 	},
 });
